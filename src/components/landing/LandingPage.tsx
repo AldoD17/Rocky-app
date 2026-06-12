@@ -194,7 +194,7 @@ export function LandingPage({ onStart }: LandingPageProps) {
   };
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-v-bg">
+    <div className="flex flex-col h-[100dvh] overflow-hidden bg-v-bg">
       <div
         className="flex-1 relative overflow-hidden"
         onTouchStart={handleTouchStart}

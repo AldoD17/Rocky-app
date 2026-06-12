@@ -73,7 +73,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, [supabase]);
 
   useEffect(() => {
+    let settled = false;
+
+    const settle = () => {
+      if (!settled) {
+        settled = true;
+        setLoading(false);
+      }
+    };
+
     const init = async () => {
+      // If the URL has OAuth params, Supabase will fire SIGNED_IN via
+      // onAuthStateChange once it exchanges the code — don't settle here or
+      // we'd set loading=false before the session is established.
+      const hasOAuthParams =
+        window.location.hash.includes("access_token") ||
+        window.location.search.includes("code=");
+      if (hasOAuthParams) return;
+
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
@@ -82,8 +99,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           loadUserPlan(session.user.id),
         ]);
       }
-      setLoading(false);
+      settle();
     };
+
     init();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -99,10 +117,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUserPlan("free");
         setStripeCustomerId(null);
       }
+      settle();
     });
 
-    return () => subscription.unsubscribe();
-  }, [supabase, loadRestaurant]);
+    // Fallback: if auth state never settles (e.g. OAuth exchange hangs), reload.
+    const fallback = setTimeout(() => {
+      if (!settled) window.location.reload();
+    }, 5000);
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(fallback);
+    };
+  }, [supabase, loadRestaurant, loadUserPlan]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });

@@ -13,6 +13,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 1,
+  viewportFit: "cover",
   themeColor: "#1a1714",
 };
 
@@ -27,10 +28,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
           href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"
         />
       </head>
-      <body className="bg-v-bg min-h-screen">
+      <body className="bg-v-bg min-h-[100dvh]">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
-            <div className="mx-auto max-w-md min-h-screen flex flex-col">
+            <div className="w-full min-h-[100dvh] flex flex-col">
               {children}
             </div>
           </AuthProvider>

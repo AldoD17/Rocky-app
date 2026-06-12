@@ -192,8 +192,14 @@ export function AppShell({ onSettings }: { onSettings: () => void }) {
         />
       )}
 
-      {/* Bottom nav */}
-      <div className="flex border-t border-v-line bg-v-panel px-1 pt-1 pb-5 shrink-0">
+      {/* Spacer that reserves room for the fixed tab bar */}
+      <div className="shrink-0 h-16" aria-hidden="true" />
+
+      {/* Bottom nav — fixed to viewport bottom, padding handles safe-area home indicator */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-10 flex border-t border-v-line bg-v-panel px-1 pt-1"
+        style={{ paddingBottom: 'max(env(safe-area-inset-bottom), 8px)' }}
+      >
         {TABS.map((tItem) => (
           <button
             key={tItem.id}
