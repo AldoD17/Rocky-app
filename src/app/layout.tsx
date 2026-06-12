@@ -31,7 +31,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
       <body className="bg-v-bg min-h-[100dvh]">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <AuthProvider>
-            <div className="w-full min-h-[100dvh] flex flex-col">
+            <div className="w-full h-full flex flex-col overflow-y-auto">
               {children}
             </div>
           </AuthProvider>

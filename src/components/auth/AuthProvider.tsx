@@ -83,14 +83,32 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     const init = async () => {
-      // If the URL has OAuth params, Supabase will fire SIGNED_IN via
-      // onAuthStateChange once it exchanges the code — don't settle here or
-      // we'd set loading=false before the session is established.
-      const hasOAuthParams =
-        window.location.hash.includes("access_token") ||
-        window.location.search.includes("code=");
-      if (hasOAuthParams) return;
+      // PKCE flow (?code=): let onAuthStateChange handle the exchange + settle.
+      if (window.location.search.includes("code=")) return;
 
+      // Implicit flow (#access_token=): Supabase may not fire onAuthStateChange
+      // reliably here, so poll getSession() every 500 ms until it resolves.
+      if (window.location.hash.includes("access_token")) {
+        let elapsed = 0;
+        while (elapsed < 10000) {
+          const { data: { session } } = await supabase.auth.getSession();
+          if (session?.user) {
+            setUser(session.user);
+            await Promise.all([
+              loadRestaurant(session.user.id),
+              loadUserPlan(session.user.id),
+            ]);
+            settle();
+            return;
+          }
+          await new Promise<void>((r) => setTimeout(r, 500));
+          elapsed += 500;
+        }
+        window.location.reload();
+        return;
+      }
+
+      // Normal load: check for an existing session.
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user) {
         setUser(session.user);
