@@ -1,0 +1,57 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=Inter:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+/* ── Tailwind v4 theme ────────────────────────────────── */
+@theme {
+  /* Colors */
+  --color-v-bg:         #0f0d0b;
+  --color-v-panel:      #1a1714;
+  --color-v-panel2:     #242018;
+  --color-v-cream:      #f5f0e8;
+  --color-v-muted:      #9a8e80;
+  --color-v-line:       #2e2820;
+  --color-v-green:      #6abf7b;
+  --color-v-green-dim:  #1e3324;
+  --color-v-amber:      #d4a24e;
+  --color-v-amber-dim:  #2e2410;
+  --color-v-red:        #cf6b5e;
+  --color-v-red-dim:    #2e1a16;
+  --color-v-gold:       #c9a86a;
+  --color-v-gold-hover: #d4b87a;
+
+  /* Fonts */
+  --font-display: "DM Serif Display", Georgia, serif;
+  --font-body: Inter, system-ui, sans-serif;
+
+  /* Animations */
+  --animate-rise:   rise 0.3s ease;
+  --animate-shake:  shake 0.35s ease;
+  --animate-typing: typing 1.2s ease infinite;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes shake {
+  0%, 100%     { transform: translateX(0); }
+  20%, 60%     { transform: translateX(-6px); }
+  40%, 80%     { transform: translateX(6px); }
+}
+
+@keyframes typing {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+
+/* ── Base styles ─────────────────────────────────────── */
+body {
+  font-family: "Inter", system-ui, sans-serif;
+  background: #0f0d0b;
+  color: #f5f0e8;
+  -webkit-font-smoothing: antialiased;
+}
+
+*::-webkit-scrollbar { width: 0; }
+input::placeholder { color: #9a8e80; }

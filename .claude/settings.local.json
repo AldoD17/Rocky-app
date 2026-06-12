@@ -1,0 +1,33 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm run *)",
+      "Bash(curl *)",
+      "Bash(node -e ' *)",
+      "Bash(node --input-type=module)",
+      "Bash(node *)",
+      "mcp__supabase__list_projects",
+      "mcp__supabase__list_tables",
+      "Bash(npx *)",
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__execute_sql",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('status:', d.get\\('status'\\)\\); print\\('shift_id:', d.get\\('shift_id'\\)\\); print\\('semaforo:', d.get\\('semaforo'\\)\\); print\\('parsed revenue:', d.get\\('parsed_data',{}\\) and d['parsed_data'].get\\('revenue'\\) if d.get\\('parsed_data'\\) else 'N/A'\\); print\\('msg preview:', str\\(d.get\\('message',''\\)\\)[:120]\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('status:', d.get\\('status'\\)\\); print\\('semaforo:', d.get\\('semaforo'\\)\\); print\\('msg:', str\\(d.get\\('message',''\\)\\)[:150]\\)\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); items=d.get\\('data',[]\\); print\\(f'GET: {len\\(items\\)} voci ->', [\\(i['category'],i['amount']\\) for i in items]\\)\")",
+      "Bash(pkill -f \"next dev\")",
+      "Bash(python3 -c ' *)",
+      "Bash(npm install *)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d.keys\\(\\)\\)\\)\")",
+      "Bash(grep -rn --include=\"*.tsx\" -E '>[^<{]+[a-zàèìòùéáíóú]{3,}[^<{]*<' /Users/aldodeda/Downloads/valsa-app/src/components/)",
+      "Bash(xargs -I{} grep -n -E '\"[A-Za-zàèìòùéáíóú ·→←]{6,}\"' {})",
+      "Bash(grep -rn --include=\"*.tsx\" -E \">['\\\\`][A-ZÀÈÌÒÙa-zàèìòùéáíóú]|\\\\\"[A-ZÀÈÌÒÙa-zàèìòùéáíóú][a-zàèìòùéáíóú]{3,}\" /Users/aldodeda/Downloads/valsa-app/src/components/app/)",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d['Auth'].keys\\(\\)\\)\\)\")",
+      "Bash(python3 *)",
+      "Bash(xargs ls -la)"
+    ]
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
+}
