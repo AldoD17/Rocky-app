@@ -281,8 +281,11 @@ export async function POST(req: NextRequest) {
     else if (assistantText.includes("🔴")) semaforo = "red";
 
     // 9. Salva conversazione
-    await supabase.from("conversations").insert({ restaurant_id, role: "user", content: user_message.trim(), shift_id: shiftId, tokens_used: null, tab: "oggi" });
-    await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, shift_id: shiftId, tokens_used: analysisRes.usage?.output_tokens || null, tab: "oggi" });
+    const { error: insertTurnoUserError } = await supabase.from("conversations").insert({ restaurant_id, role: "user", content: user_message.trim(), shift_id: shiftId, tokens_used: null, tab: "oggi" });
+    if (insertTurnoUserError) console.error("TURNO CONVERSATION USER ERROR:", JSON.stringify(insertTurnoUserError));
+
+    const { error: insertTurnoAssistantError } = await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, shift_id: shiftId, tokens_used: analysisRes.usage?.output_tokens || null, tab: "oggi" });
+    if (insertTurnoAssistantError) console.error("TURNO CONVERSATION ASSISTANT ERROR:", JSON.stringify(insertTurnoAssistantError));
 
     return NextResponse.json({ status: "ok", message: assistantText, semaforo, shift_id: shiftId, warnings, parsed_data: parsed });
   } catch (error) {
