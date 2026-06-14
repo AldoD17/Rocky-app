@@ -211,7 +211,7 @@ export function OnboardingFlow({ onComplete }: { onComplete: () => void }) {
             ? t("step2AskFormatWith", { name: localeName })
             : t("step2AskFormatWithout")}
         </Bubble>
-        <div className="flex gap-2 flex-wrap mt-3 max-h-48 overflow-y-auto pr-1">
+        <div className="grid grid-cols-2 gap-2 mt-3 [&>button]:w-full">
           {FORMATS.map((f, i) => (
             <Chip key={f.value} label={f.label} active={selectedFormat === i}
               onClick={() => setSelectedFormat(i)} />
