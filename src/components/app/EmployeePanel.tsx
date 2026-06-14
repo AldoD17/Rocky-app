@@ -120,7 +120,7 @@ export function EmployeePanel({ onConfirm, onClose }: EmployeePanelProps) {
       <div className="fixed inset-0 bg-black/60 z-40" onClick={onClose} />
 
       {/* Panel — bottom sheet */}
-      <div className="fixed bottom-0 left-0 right-0 z-50 mx-auto max-w-md bg-v-panel border-t border-v-line rounded-t-2xl">
+      <div className="fixed left-0 right-0 z-50 mx-auto max-w-md bg-v-panel border-t border-v-line rounded-t-2xl" style={{ bottom: 'calc(56px + max(env(safe-area-inset-bottom, 0px), 8px))' }}>
         {/* Handle */}
         <div className="flex justify-center pt-3 pb-1">
           <div className="w-10 h-1 rounded-full bg-v-line" />
@@ -133,7 +133,7 @@ export function EmployeePanel({ onConfirm, onClose }: EmployeePanelProps) {
         </div>
 
         {/* Lista dipendenti */}
-        <div className="px-4 overflow-y-auto" style={{ maxHeight: "55vh" }}>
+        <div className="px-4 pb-24 overflow-y-auto" style={{ maxHeight: "55vh" }}>
           {loading ? (
             <div className="text-v-muted text-sm font-body text-center py-6">{t("loading")}</div>
           ) : employees.length === 0 ? (
