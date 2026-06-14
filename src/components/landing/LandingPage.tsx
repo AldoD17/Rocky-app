@@ -40,7 +40,8 @@ function PanelHero({ onStart }: { onStart: () => void }) {
         <div className="flex flex-col items-center gap-3">
           <Mascot size={64} />
           <div className="font-display text-v-cream text-[38px] leading-none font-bold">Rocky</div>
-          <div className="text-v-muted text-[13px] font-body leading-[1.55] max-w-[260px]">
+          <div className="text-sm italic text-v-muted font-body">L&apos;aragosta</div>
+          <div className="text-v-muted text-sm font-body leading-[1.55] max-w-[260px]">
             {t("hero")}
           </div>
         </div>
@@ -66,8 +67,8 @@ function PromiseBlock({ icon, title, desc }: { icon: string; title: string; desc
       <div className="w-11 h-11 rounded-full bg-v-panel2 border border-v-line flex items-center justify-center shrink-0">
         <i className={`ti ${icon} text-v-gold`} style={{ fontSize: 22 }} />
       </div>
-      <div className="font-display text-v-cream text-[14px] leading-snug">{title}</div>
-      <div className="text-v-muted text-[11.5px] font-body leading-[1.55] max-w-[240px]">{desc}</div>
+      <div className="font-display text-v-cream text-base leading-snug">{title}</div>
+      <div className="text-v-muted text-sm font-body leading-[1.55] max-w-[240px]">{desc}</div>
     </div>
   );
 }
@@ -91,7 +92,7 @@ function PanelPromises() {
         title={t("promise3Title")}
         desc={t("promise3Desc")}
       />
-      <div className="w-full border-t border-v-line pt-4 text-center text-v-gold text-[11px] font-body leading-[1.5]">
+      <div className="w-full border-t border-v-line pt-4 text-center text-v-gold text-xs font-body leading-[1.5]">
         {t("promisesFooter")}
       </div>
     </div>
@@ -104,7 +105,7 @@ function PlanFeature({ text }: { text: string }) {
       <span className="text-v-gold mt-0.5 shrink-0">
         <i className="ti ti-check" style={{ fontSize: 13 }} />
       </span>
-      <span className="text-v-muted text-[11px] font-body leading-[1.5]">{text}</span>
+      <span className="text-v-muted text-xs font-body leading-[1.5]">{text}</span>
     </div>
   );
 }
@@ -112,9 +113,9 @@ function PlanFeature({ text }: { text: string }) {
 function PanelPricing({ onStart }: { onStart: () => void }) {
   const t = useTranslations("Pricing");
   return (
-    <div className="relative h-full flex flex-col items-center justify-center px-4 w-1/3 shrink-0">
+    <div className="relative h-full flex flex-col items-center justify-center px-5 w-1/3 shrink-0">
       <div className="w-full max-w-sm">
-        <h2 className="font-display text-v-cream text-[20px] leading-tight text-center mb-5">
+        <h2 className="font-display text-v-cream text-2xl leading-tight text-center mb-5">
           {t("title")}
         </h2>
 
@@ -122,10 +123,10 @@ function PanelPricing({ onStart }: { onStart: () => void }) {
           {/* Piano Base */}
           <div className="flex-1 bg-v-panel2 border border-v-line rounded-2xl p-4 flex flex-col gap-3">
             <div>
-              <div className="font-display text-v-cream text-[15px]">{t("baseName")}</div>
+              <div className="font-display text-v-cream text-base">{t("baseName")}</div>
               <div className="flex items-baseline gap-0.5 mt-1">
                 <span className="font-display text-v-cream text-[24px] leading-none">{t("basePrice")}</span>
-                <span className="text-v-muted text-[11px] font-body">{t("perMonth")}</span>
+                <span className="text-v-muted text-xs font-body">{t("perMonth")}</span>
               </div>
             </div>
             <div className="flex flex-col gap-1.5 flex-1">
@@ -135,7 +136,7 @@ function PanelPricing({ onStart }: { onStart: () => void }) {
             </div>
             <button
               onClick={onStart}
-              className="w-full min-h-[40px] bg-transparent border border-v-line text-v-cream rounded-full font-body font-semibold text-[13px] cursor-pointer hover:border-v-gold hover:text-v-gold transition-colors"
+              className="w-full min-h-[40px] bg-transparent border border-v-line text-v-cream rounded-full font-body font-semibold text-sm cursor-pointer hover:border-v-gold hover:text-v-gold transition-colors"
             >
               {t("cta")}
             </button>
@@ -143,14 +144,14 @@ function PanelPricing({ onStart }: { onStart: () => void }) {
 
           {/* Piano Pro */}
           <div className="flex-1 bg-v-panel2 border-2 border-v-gold rounded-2xl p-4 flex flex-col gap-3 relative">
-            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-v-gold text-v-bg text-[10px] font-body font-semibold px-2.5 py-0.5 rounded-full whitespace-nowrap">
+            <span className="absolute -top-3 left-1/2 -translate-x-1/2 bg-v-gold text-v-bg text-xs font-body font-semibold px-2.5 py-0.5 rounded-full whitespace-nowrap">
               {t("recommended")}
             </span>
             <div>
-              <div className="font-display text-v-gold text-[15px]">{t("proName")}</div>
+              <div className="font-display text-v-gold text-base">{t("proName")}</div>
               <div className="flex items-baseline gap-0.5 mt-1">
                 <span className="font-display text-v-cream text-[24px] leading-none">{t("proPrice")}</span>
-                <span className="text-v-muted text-[11px] font-body">{t("perMonth")}</span>
+                <span className="text-v-muted text-xs font-body">{t("perMonth")}</span>
               </div>
             </div>
             <div className="flex flex-col gap-1.5 flex-1">
@@ -160,14 +161,14 @@ function PanelPricing({ onStart }: { onStart: () => void }) {
             </div>
             <button
               onClick={onStart}
-              className="w-full min-h-[40px] bg-v-gold text-v-bg rounded-full font-body font-semibold text-[13px] cursor-pointer hover:bg-v-gold-hover transition-colors active:scale-[0.98]"
+              className="w-full min-h-[40px] bg-v-gold text-v-bg rounded-full font-body font-semibold text-sm cursor-pointer hover:bg-v-gold-hover transition-colors active:scale-[0.98]"
             >
               {t("cta")}
             </button>
           </div>
         </div>
 
-        <p className="text-center text-v-muted text-[11px] font-body mt-4 leading-[1.5]">
+        <p className="text-center text-v-muted text-xs font-body mt-4 leading-[1.5]">
           {t("trialNote")}
         </p>
       </div>
