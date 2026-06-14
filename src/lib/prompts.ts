@@ -60,6 +60,7 @@ Regole:
 - receipts: numero di scontrini/coperti paganti.
 - service_hours: ore di servizio (durata, non ore uomo).
 - workers_count: numero persone in turno.
+- Il messaggio può contenere righe nel formato '💰 Incasso: VALORE', '🧾 Scontrini: VALORE', '⏱️ Ore servizio: VALORE', '👥 Lavoratori: VALORE'. Estrai i valori numerici da queste righe.
 - supplier_spend: totale spesa fornitori (somma di tutti gli acquisti). null se non menzionata.
 - purchases: array di acquisti menzionati. Ogni elemento ha:
   - supplier_name: nome del fornitore (es. "Metro", "La Pescheria", "cinesi"). Usa il nome esatto dal messaggio.

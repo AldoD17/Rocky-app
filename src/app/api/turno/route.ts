@@ -55,6 +55,7 @@ function buildShiftAnalysisMessage(parsed: ParsedShift): string {
     parsed.workers_count ? `Persone in turno: ${parsed.workers_count}${manHours ? ` (${manHours} man-hours)` : ""}` : "",
     parsed.supplier_spend ? `Spesa totale fornitori: €${parsed.supplier_spend}${foodCostPct ? ` (food cost ${foodCostPct}%)` : ""}${purchasesStr}` : "Food cost: non registrato",
     revenuePerMh ? `Revenue/man-hour: €${revenuePerMh}` : "",
+    parsed.missing_fields.length > 0 ? `Dati non forniti: ${parsed.missing_fields.join(", ")}. Menzionalo brevemente nella risposta.` : "",
     "",
     "Rispondi con semaforo 🟢🟡🔴, numero-eroe e max 3 righe di analisi.",
   ].filter(Boolean).join("\n");
@@ -185,24 +186,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: "ok", message: assistantText, semaforo, parsed_data: null });
     }
 
-    // 3. Dati mancanti
-    if (parsed.missing_fields && parsed.missing_fields.length > 0) {
-      const labels: Record<string, string> = {
-        revenue: "incasso della serata in euro",
-        receipts: "numero di scontrini",
-        service_hours: "ore di servizio",
-        workers_count: "quante persone erano in turno",
-      };
-      const missing = parsed.missing_fields.map((f) => labels[f] || f);
-      return NextResponse.json({
-        status: "needs_clarification",
-        message: `Non ho capito ${missing.join(" e ")}. Me lo puoi ridire?`,
-        missing_fields: parsed.missing_fields,
-        parsed_data: parsed,
-      });
-    }
-
-    // 4. Validazione anomalie
+    // 3. Validazione anomalie
     const warnings: string[] = [];
     if (parsed.revenue && parsed.revenue > 50000) warnings.push("Incasso molto alto (>50.000€): è corretto?");
     if (parsed.revenue && parsed.revenue < 10) warnings.push("Incasso molto basso (<10€): errore di battitura?");
