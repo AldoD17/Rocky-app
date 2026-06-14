@@ -48,7 +48,7 @@ export function YearSummary() {
 
       if (shifts) {
         for (const s of shifts) {
-          const m = new Date(s.shift_date).getMonth();
+          const m = parseInt(s.shift_date.split('-')[1]) - 1;
           rev[m] += s.revenue ?? 0;
           cogs[m] += s.supplier_spend ?? 0;
           labor[m] += (s.workers_count ?? 0) * (s.service_hours ?? 0) * 20 * 1.55;

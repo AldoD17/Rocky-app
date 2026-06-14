@@ -99,7 +99,7 @@ export function MonthSummary() {
   if (ebitda > 0) semaforoState = "green";
   else if (ebitdaPct >= -5) semaforoState = "yellow";
 
-  const workingDays = 25;
+  const workingDays = (restaurant?.open_days_per_week ?? 6) * 4.33;
   const dailyFixed = (fixedTotal + laborEstimate) / workingDays;
   const breakEvenDaily = totalCogs > 0 && revenue > 0
     ? dailyFixed / (1 - totalCogs / revenue)

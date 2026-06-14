@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { createServerClient } from "@supabase/ssr";
 import { createServiceClient } from "@/lib/supabase-server";
 import { TURNO_EXTRACTION_PROMPT, buildSystemPrompt } from "@/lib/prompts";
 
@@ -113,8 +114,20 @@ export async function POST(req: NextRequest) {
     if (!restaurant_id) return NextResponse.json({ status: "error", message: "Manca restaurant_id" }, { status: 400 });
     if (!user_message || user_message.trim().length < 3) return NextResponse.json({ status: "error", message: "Messaggio troppo corto" }, { status: 400 });
 
+    const authClient = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { cookies: { getAll: () => req.cookies.getAll(), setAll: () => {} } }
+    );
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) return NextResponse.json({ status: "error", message: "Unauthorized" }, { status: 401 });
+
     const today = new Date().toISOString().split("T")[0];
     const supabase = createServiceClient();
+    const { data: ownedRestaurant } = await supabase
+      .from("restaurants").select("user_id").eq("id", restaurant_id).single();
+    if (!ownedRestaurant || ownedRestaurant.user_id !== user.id)
+      return NextResponse.json({ status: "error", message: "Forbidden" }, { status: 403 });
 
     // 1. Estrai dati strutturati
     const extractionRes = await anthropic.messages.create({
@@ -167,8 +180,8 @@ export async function POST(req: NextRequest) {
       else if (assistantText.includes("🟡")) semaforo = "yellow";
       else if (assistantText.includes("🔴")) semaforo = "red";
 
-      await supabase.from("conversations").insert({ restaurant_id, role: "user", content: user_message.trim(), tokens_used: null });
-      await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, tokens_used: chatRes.usage?.output_tokens || null });
+      await supabase.from("conversations").insert({ restaurant_id, role: "user", content: user_message.trim(), tokens_used: null, tab: "oggi" });
+      await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, tokens_used: chatRes.usage?.output_tokens || null, tab: "oggi" });
       return NextResponse.json({ status: "ok", message: assistantText, semaforo, parsed_data: null });
     }
 
@@ -268,8 +281,8 @@ export async function POST(req: NextRequest) {
     else if (assistantText.includes("🔴")) semaforo = "red";
 
     // 9. Salva conversazione
-    await supabase.from("conversations").insert({ restaurant_id, role: "user", content: user_message.trim(), shift_id: shiftId, tokens_used: null });
-    await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, shift_id: shiftId, tokens_used: analysisRes.usage?.output_tokens || null });
+    await supabase.from("conversations").insert({ restaurant_id, role: "user", content: user_message.trim(), shift_id: shiftId, tokens_used: null, tab: "oggi" });
+    await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, shift_id: shiftId, tokens_used: analysisRes.usage?.output_tokens || null, tab: "oggi" });
 
     return NextResponse.json({ status: "ok", message: assistantText, semaforo, shift_id: shiftId, warnings, parsed_data: parsed });
   } catch (error) {

@@ -1,11 +1,12 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useAuth } from "@/components/auth/AuthProvider";
 import { Button, TextInput } from "@/components/ui";
 import { useTranslations, useLocale } from "next-intl";
 import { CCNL_MULTIPLIERS } from "@/lib/types";
 import type { FixedCost, Employee } from "@/lib/types";
 import { FORMATS, FIXED_COST_CATEGORIES, FREQUENCY_OPTIONS } from "@/lib/constants";
+import { createClient } from "@/lib/supabase-browser";
 
 type View = "main" | "plan";
 type DeleteState = "idle" | "confirming" | "requested";
@@ -132,6 +133,9 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
   const [showAddEmp, setShowAddEmp] = useState(false);
   const [newEmp, setNewEmp] = useState({ name: "", role: "", contract_type: "full_time", hourly_rate_gross: "" });
 
+  const supabase = useMemo(() => createClient(), []);
+  const [tabUsage, setTabUsage] = useState<Record<string, number>>({});
+
   // Plan view — Stripe
   const [checkoutLoading, setCheckoutLoading] = useState<"base" | "pro" | null>(null);
   const [portalLoading, setPortalLoading] = useState(false);
@@ -201,6 +205,25 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
     fetchEmployees();
   }, [fetchFixedCosts, fetchEmployees]);
 
+  useEffect(() => {
+    if (!restaurantId) return;
+    const today = new Date().toISOString().split("T")[0];
+    supabase
+      .from("conversations")
+      .select("tab")
+      .eq("restaurant_id", restaurantId)
+      .eq("role", "user")
+      .gte("created_at", today)
+      .not("tab", "is", null)
+      .then(({ data }) => {
+        const counts: Record<string, number> = {};
+        for (const row of data || []) {
+          if (row.tab) counts[row.tab] = (counts[row.tab] ?? 0) + 1;
+        }
+        setTabUsage(counts);
+      });
+  }, [restaurantId, supabase]);
+
   // ── Translation lookup maps ──────────────────────────
   const FREQ_LABELS: Record<string, string> = {
     mensile: t("freqMensile"), bimestrale: t("freqBimestrale"),
@@ -221,10 +244,13 @@ export function SettingsScreen({ onBack }: { onBack: () => void }) {
     { value: "de", label: "Deutsch" }, { value: "nl", label: "Nederlands" },
     { value: "pt", label: "Português" },
   ];
+  const isPro = userPlan === "pro";
   const USAGE_TABS = [
-    { label: tApp("tabDay"), limit: 5, used: 0 }, { label: tApp("tabWeek"), limit: 5, used: 0 },
-    { label: tApp("tabMonth"), limit: 5, used: 0 }, { label: tApp("tabLearn"), limit: 5, used: 0 },
-    { label: tApp("tabYear"), limit: 3, used: 0 },
+    { label: tApp("tabDay"),   limit: isPro ? 50 : 5,  used: tabUsage["oggi"]  ?? 0 },
+    { label: tApp("tabWeek"),  limit: isPro ? 50 : 5,  used: tabUsage["week"]  ?? 0 },
+    { label: tApp("tabMonth"), limit: isPro ? 50 : 5,  used: tabUsage["month"] ?? 0 },
+    { label: tApp("tabLearn"), limit: isPro ? 50 : 5,  used: tabUsage["learn"] ?? 0 },
+    { label: tApp("tabYear"),  limit: isPro ? 20 : 3,  used: tabUsage["year"]  ?? 0 },
   ];
 
   // ── Save handlers ────────────────────────────────────

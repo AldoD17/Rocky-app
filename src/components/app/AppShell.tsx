@@ -143,7 +143,7 @@ export function AppShell({ onSettings }: { onSettings: () => void }) {
     ) : undefined;
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-[100dvh]">
       {showEmployeePanel && (
         <EmployeePanel
           onConfirm={(formattedText, workers) => {

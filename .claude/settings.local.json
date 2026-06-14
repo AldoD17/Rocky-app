@@ -23,7 +23,8 @@
       "Bash(grep -rn --include=\"*.tsx\" -E \">['\\\\`][A-ZÀÈÌÒÙa-zàèìòùéáíóú]|\\\\\"[A-ZÀÈÌÒÙa-zàèìòùéáíóú][a-zàèìòùéáíóú]{3,}\" /Users/aldodeda/Downloads/valsa-app/src/components/app/)",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d['Auth'].keys\\(\\)\\)\\)\")",
       "Bash(python3 *)",
-      "Bash(xargs ls -la)"
+      "Bash(xargs ls -la)",
+      "mcp__supabase__get_project"
     ]
   },
   "enableAllProjectMcpServers": true,

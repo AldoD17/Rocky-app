@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
+import { createServerClient } from "@supabase/ssr";
 import { createServiceClient } from "@/lib/supabase-server";
 import { buildSystemPrompt, buildLearnSystemPrompt } from "@/lib/prompts";
 
@@ -43,7 +44,19 @@ export async function POST(req: NextRequest) {
     if (!restaurant_id) return NextResponse.json({ status: "error", message: "Manca restaurant_id" }, { status: 400 });
     if (!user_message || user_message.trim().length < 2) return NextResponse.json({ status: "error", message: "Messaggio troppo corto" }, { status: 400 });
 
+    const authClient = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { cookies: { getAll: () => req.cookies.getAll(), setAll: () => {} } }
+    );
+    const { data: { user } } = await authClient.auth.getUser();
+    if (!user) return NextResponse.json({ status: "error", message: "Unauthorized" }, { status: 401 });
+
     const supabase = createServiceClient();
+    const { data: ownedRestaurant } = await supabase
+      .from("restaurants").select("user_id").eq("id", restaurant_id).single();
+    if (!ownedRestaurant || ownedRestaurant.user_id !== user.id)
+      return NextResponse.json({ status: "error", message: "Forbidden" }, { status: 403 });
 
     // 1. Profilo ristorante
     const { data: restaurantData, error: rpcError } = await supabase.rpc("get_dati_ristorante", { p_restaurant_id: restaurant_id });
@@ -67,7 +80,7 @@ export async function POST(req: NextRequest) {
     if (tab === "week") {
       const { monday, sunday } = getWeekRange();
       const { data: weekShifts } = await supabase
-        .from("shifts").select("shift_date, service_type, revenue, receipts, service_hours, workers_count, supplier_spend, avg_receipt, food_cost_pct")
+        .from("shifts").select("id, shift_date, service_type, revenue, receipts, service_hours, workers_count, supplier_spend, avg_receipt, food_cost_pct")
         .eq("restaurant_id", restaurant_id).gte("shift_date", monday).lte("shift_date", sunday).order("shift_date");
       const { data: weekPurchases } = await supabase
         .from("purchases").select("supplier_name, amount, category, purchase_date")
@@ -167,8 +180,8 @@ export async function POST(req: NextRequest) {
     const tokensUsed = response.usage?.output_tokens || null;
 
     // 7. Salva conversazione
-    await supabase.from("conversations").insert({ restaurant_id, role: "user", content: user_message.trim(), tokens_used: null });
-    await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, tokens_used: tokensUsed });
+    await supabase.from("conversations").insert({ restaurant_id, role: "user", content: user_message.trim(), tokens_used: null, tab });
+    await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, tokens_used: tokensUsed, tab });
 
     return NextResponse.json({ status: "ok", message: assistantText, semaforo, tokens_used: tokensUsed });
   } catch (error) {
