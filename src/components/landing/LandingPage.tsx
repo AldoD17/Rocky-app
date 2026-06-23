@@ -40,7 +40,7 @@ function PanelHero({ onStart }: { onStart: () => void }) {
         <div className="flex flex-col items-center gap-3">
           <Mascot size={64} />
           <div className="font-display text-v-cream text-[38px] leading-none font-bold">Rocky</div>
-          <div className="text-sm italic text-v-muted font-body">L&apos;aragosta</div>
+          <div className="text-sm italic text-v-muted font-body">{t("tagline")}</div>
           <div className="text-v-muted text-sm font-body leading-[1.55] max-w-[260px]">
             {t("hero")}
           </div>
