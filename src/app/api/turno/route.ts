@@ -57,7 +57,7 @@ function buildShiftAnalysisMessage(parsed: ParsedShift): string {
     revenuePerMh ? `Revenue/man-hour: €${revenuePerMh}` : "",
     parsed.missing_fields.length > 0 ? `Dati non forniti: ${parsed.missing_fields.join(", ")}. Menzionalo brevemente nella risposta.` : "",
     "",
-    "Rispondi con semaforo 🟢🟡🔴, numero-eroe e max 3 righe di analisi.",
+    "Rispondi SOLO con JSON valido nel formato specificato nel system prompt. Nessun testo fuori dal JSON.",
   ].filter(Boolean).join("\n");
 }
 
@@ -183,7 +183,18 @@ export async function POST(req: NextRequest) {
 
       await supabase.from("conversations").insert({ restaurant_id, role: "user", content: user_message.trim(), tokens_used: null, tab: "oggi" });
       await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, tokens_used: chatRes.usage?.output_tokens || null, tab: "oggi" });
-      return NextResponse.json({ status: "ok", message: assistantText, semaforo, parsed_data: null });
+
+      let structuredNonShift: Record<string, unknown> | null = null;
+      try {
+        const cleanedNS = assistantText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+        structuredNonShift = JSON.parse(cleanedNS);
+        if (structuredNonShift && structuredNonShift.semaforo) {
+          semaforo = structuredNonShift.semaforo === 'green' ? 'green' : structuredNonShift.semaforo === 'red' ? 'red' : 'yellow';
+        }
+      } catch {
+        structuredNonShift = null;
+      }
+      return NextResponse.json({ status: "ok", message: assistantText, semaforo, parsed_data: null, structured: structuredNonShift });
     }
 
     // 3. Validazione anomalie
@@ -271,7 +282,17 @@ export async function POST(req: NextRequest) {
     const { error: insertTurnoAssistantError } = await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, shift_id: shiftId, tokens_used: analysisRes.usage?.output_tokens || null, tab: "oggi" });
     if (insertTurnoAssistantError) console.error("TURNO CONVERSATION ASSISTANT ERROR:", JSON.stringify(insertTurnoAssistantError));
 
-    return NextResponse.json({ status: "ok", message: assistantText, semaforo, shift_id: shiftId, warnings, parsed_data: parsed });
+    let structured: Record<string, unknown> | null = null;
+    try {
+      const cleaned = assistantText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+      structured = JSON.parse(cleaned);
+      if (structured && structured.semaforo) {
+        semaforo = structured.semaforo === 'green' ? 'green' : structured.semaforo === 'red' ? 'red' : 'yellow';
+      }
+    } catch {
+      structured = null;
+    }
+    return NextResponse.json({ status: "ok", message: assistantText, semaforo, shift_id: shiftId, warnings, parsed_data: parsed, structured });
   } catch (error) {
     console.error("Turno API error:", error);
     return NextResponse.json({ status: "error", message: "Errore interno del server" }, { status: 500 });

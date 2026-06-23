@@ -1,10 +1,12 @@
 "use client";
 import React, { useState, useRef, useEffect, forwardRef, useImperativeHandle } from "react";
 import { Bubble } from "@/components/ui";
+import { RockyCard } from "@/components/app/RockyCard";
 
 interface Message {
   role: "bot" | "user";
   content: string;
+  structured?: Record<string, unknown> | null;
 }
 
 export interface QuickButton {
@@ -88,11 +90,17 @@ export const ChatView = forwardRef<ChatViewHandle, ChatViewProps>(function ChatV
       {/* Scrollable area */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
         {headerSlot}
-        {messages.map((m, i) => (
-          <Bubble key={i} from={m.role === "bot" ? "bot" : "user"}>
-            {m.content}
-          </Bubble>
-        ))}
+        {messages.map((m, i) =>
+          m.role === "bot" && m.structured ? (
+            <div key={i} className="mb-2">
+              <RockyCard data={m.structured as unknown as Parameters<typeof RockyCard>[0]["data"]} />
+            </div>
+          ) : (
+            <Bubble key={i} from={m.role === "bot" ? "bot" : "user"}>
+              {m.content}
+            </Bubble>
+          )
+        )}
         {loading && (
           <div className="flex justify-start mb-2">
             <div className="bg-v-panel2 px-4 py-3 rounded-[18px] rounded-bl-[4px] flex items-center gap-1">

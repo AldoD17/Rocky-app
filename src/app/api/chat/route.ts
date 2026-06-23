@@ -179,6 +179,20 @@ export async function POST(req: NextRequest) {
 
     const tokensUsed = response.usage?.output_tokens || null;
 
+    // Parse structured JSON response (all tabs except learn)
+    let structured: Record<string, unknown> | null = null;
+    if (tab !== 'learn') {
+      try {
+        const cleaned = assistantText.replace(/^```json\s*/i, '').replace(/^```\s*/i, '').replace(/```\s*$/i, '').trim();
+        structured = JSON.parse(cleaned);
+        if (structured && structured.semaforo) {
+          semaforo = structured.semaforo === 'green' ? 'green' : structured.semaforo === 'red' ? 'red' : 'yellow';
+        }
+      } catch {
+        structured = null;
+      }
+    }
+
     // 7. Salva conversazione
     const { error: insertUserError } = await supabase.from("conversations").insert({ restaurant_id, role: "user", content: user_message.trim(), tokens_used: null, tab });
     if (insertUserError) console.error("CONVERSATION INSERT USER ERROR:", JSON.stringify(insertUserError));
@@ -186,7 +200,7 @@ export async function POST(req: NextRequest) {
     const { error: insertAssistantError } = await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, tokens_used: tokensUsed, tab });
     if (insertAssistantError) console.error("CONVERSATION INSERT ASSISTANT ERROR:", JSON.stringify(insertAssistantError));
 
-    return NextResponse.json({ status: "ok", message: assistantText, semaforo, tokens_used: tokensUsed });
+    return NextResponse.json({ status: "ok", message: assistantText, structured, semaforo, tokens_used: tokensUsed });
   } catch (error) {
     console.error("Chat API error:", error);
     return NextResponse.json({ status: "error", message: "Errore interno del server" }, { status: 500 });

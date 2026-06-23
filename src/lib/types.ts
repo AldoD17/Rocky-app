@@ -102,6 +102,7 @@ export interface ChatResponse {
   message: string;
   semaforo: "green" | "yellow" | "red" | null;
   tokens_used: number | null;
+  structured?: Record<string, unknown> | null;
 }
 
 export interface TurnoRequest {
@@ -117,6 +118,7 @@ export interface TurnoResponse {
   missing_fields?: string[];
   parsed_data?: Record<string, unknown> | null;
   semaforo?: "green" | "yellow" | "red" | null;
+  structured?: Record<string, unknown> | null;
 }
 
 // CCNL multipliers

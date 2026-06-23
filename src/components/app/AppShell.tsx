@@ -12,7 +12,7 @@ import { useTranslations, useLocale } from "next-intl";import type { ChatRespons
 
 type TabId = "day" | "week" | "month" | "year" | "learn";
 
-interface Message { role: "bot" | "user"; content: string; }
+interface Message { role: "bot" | "user"; content: string; structured?: Record<string, unknown> | null; }
 
 
 function getGreeting() {
@@ -99,12 +99,12 @@ export function AppShell({ onSettings }: { onSettings: () => void }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data: ChatResponse & { status: string; parsed_data?: Record<string, unknown> | null } = await res.json();
+      const data: ChatResponse & { status: string; parsed_data?: Record<string, unknown> | null; structured?: Record<string, unknown> | null } = await res.json();
 
       if (data.status !== "error") {
         setChatState((s) => ({
           ...s,
-          [currentTab]: [...(s[currentTab] || withUser), { role: "bot", content: data.message }],
+          [currentTab]: [...(s[currentTab] || withUser), { role: "bot", content: data.message, structured: data.structured ?? null }],
         }));
         if (currentTab === "day") setPendingWorkers([]);
       } else {

@@ -1,0 +1,1026 @@
+{
+  "metadata": {
+    "nome": "Database KPI Ristorazione Europea",
+    "versione": "1.0",
+    "data_creazione": "2026-06-23",
+    "copertura_geografica": ["IT", "FR", "DE", "ES", "UK"],
+    "lingue": ["it"],
+    "note_metodologiche": "I benchmark sono classificati per affidabilità: CERTIFICATO = dato estratto da fonte primaria pubblica verificabile; STIMA_SETTORE = range ampiamente condiviso nella letteratura di settore ma non attribuibile a una singola fonte primaria; STIMA_MODELLO = elaborazione interna basata su logica economica e fonti aggregate.",
+    "fonti_primarie": [
+      {
+        "id": "FIPE_2025",
+        "nome": "FIPE – Rapporto Ristorazione 2025",
+        "url": "https://www.fipe.it/wp-content/uploads/2025/08/RAPPORTO-RISTORAZIONE-2025-1-1.pdf",
+        "anno": 2025,
+        "ente": "Federazione Italiana Pubblici Esercizi – Confcommercio"
+      },
+      {
+        "id": "FIPE_2024",
+        "nome": "FIPE – Rapporto Ristorazione 2024",
+        "url": "https://www.fipe.it/wp-content/uploads/2024/04/Rapporto-Ristorazione-2024.pdf",
+        "anno": 2024,
+        "ente": "Federazione Italiana Pubblici Esercizi – Confcommercio"
+      },
+      {
+        "id": "NRA_2025",
+        "nome": "National Restaurant Association – Restaurant Operations Data Abstract 2025",
+        "url": "https://restaurant.org/research-and-media/research/restaurant-economic-insights/",
+        "anno": 2025,
+        "ente": "National Restaurant Association (USA)",
+        "nota": "Dati USA adattati al contesto europeo con aggiustamenti strutturali"
+      },
+      {
+        "id": "CCNL_FIPE_2024",
+        "nome": "CCNL Pubblici Esercizi, Ristorazione e Turismo – Rinnovo 5 giugno 2024",
+        "url": "https://www.fipe.it",
+        "anno": 2024,
+        "ente": "FIPE, FILCAMS-CGIL, FISASCAT-CISL, UILTUCS"
+      },
+      {
+        "id": "MINISTERO_LAVORO_2025",
+        "nome": "Decreto Direttoriale n.63 – Costo medio orario lavoro ristorazione collettiva",
+        "url": "https://www.lavoro.gov.it/temi-e-priorita/rapporti-di-lavoro-e-relazioni-industriali/focus-on/analisi-economiche-costo-lavoro/pagine/settore-ristorazione-collettiva",
+        "anno": 2025,
+        "ente": "Ministero del Lavoro e delle Politiche Sociali"
+      },
+      {
+        "id": "LINEUP_AI_2024",
+        "nome": "Average Restaurant Profit Margins – Global Benchmark Report",
+        "url": "https://www.lineup.ai/average-restaurant-profit-margins/",
+        "anno": 2024,
+        "ente": "Lineup.ai (aggregazione dati su aziende quotate globali)"
+      },
+      {
+        "id": "VANTA_2024",
+        "nome": "Restaurant Food Cost & Profit Margin Benchmarks 2024",
+        "url": "https://vantainsights.com/insights/restaurant-food-cost-percentage",
+        "anno": 2024,
+        "ente": "VantaInsights"
+      },
+      {
+        "id": "MENUVIEL_2026",
+        "nome": "Deliveroo Fees and Commissions for Restaurants 2026",
+        "url": "https://blog.menuviel.com/deliveroo-fees-and-commissions-for-restaurants/",
+        "anno": 2026,
+        "ente": "Menuviel"
+      }
+    ]
+  },
+
+  "tassonomia": {
+    "categorie": [
+      {
+        "id": "A",
+        "nome": "Ristorazione Formale (Full Service Restaurant / FSR)",
+        "sottocategorie": [
+          { "id": "A1", "nome": "Fine Dining", "scontrino_medio_eur": { "min": 80, "max": 200, "valuta": "EUR" }, "paesi_riferimento": ["IT","FR","DE","UK","ES"] },
+          { "id": "A2", "nome": "Casual Dining", "scontrino_medio_eur": { "min": 25, "max": 60 }, "paesi_riferimento": ["IT","FR","DE","UK","ES"] },
+          { "id": "A3", "nome": "Trattoria / Osteria / Brasserie / Gasthaus / Taberna", "scontrino_medio_eur": { "min": 18, "max": 35 }, "paesi_riferimento": ["IT","FR","DE","ES"] },
+          { "id": "A4", "nome": "Ristorante Etnico", "scontrino_medio_eur": { "min": 20, "max": 45 }, "paesi_riferimento": ["IT","FR","DE","UK","ES"] }
+        ]
+      },
+      {
+        "id": "B",
+        "nome": "Ristorazione Veloce (Quick Service / QSR)",
+        "sottocategorie": [
+          { "id": "B1", "nome": "Fast Food Strutturato", "scontrino_medio_eur": { "min": 8, "max": 14 } },
+          { "id": "B2", "nome": "Fast Casual", "scontrino_medio_eur": { "min": 12, "max": 20 } },
+          { "id": "B3", "nome": "Street Food / Food Truck", "scontrino_medio_eur": { "min": 5, "max": 12 } },
+          { "id": "B4", "nome": "Take Away / Rosticceria / Gastronomia", "scontrino_medio_eur": { "min": 8, "max": 18 } }
+        ]
+      },
+      {
+        "id": "C",
+        "nome": "Bar, Caffetteria e Beverage-Led",
+        "sottocategorie": [
+          { "id": "C1", "nome": "Bar Italiano / Café", "scontrino_medio_eur": { "min": 1.5, "max": 6 }, "note": "~127.667 unità in Italia (FIPE 2025)" },
+          { "id": "C2", "nome": "Specialty Coffee / Terza Ondata", "scontrino_medio_eur": { "min": 4, "max": 10 } },
+          { "id": "C3", "nome": "Cocktail Bar / Wine Bar / Enoteca", "scontrino_medio_eur": { "min": 12, "max": 30 } },
+          { "id": "C4", "nome": "Brew Pub / Birreria Artigianale", "scontrino_medio_eur": { "min": 20, "max": 35 } }
+        ]
+      },
+      {
+        "id": "D",
+        "nome": "Delivery & Dark Kitchen",
+        "sottocategorie": [
+          { "id": "D1", "nome": "Dark Kitchen / Ghost Kitchen", "scontrino_medio_netto_eur": { "min": 18, "max": 35, "nota": "al netto commissioni piattaforma" } },
+          { "id": "D2", "nome": "Hybrid Kitchen", "note": "Ristorante fisico + delivery con brand separato" },
+          { "id": "D3", "nome": "Multi-Brand Cloud Kitchen", "note": "Una cucina, 3–8 brand virtuali simultanei" }
+        ]
+      },
+      {
+        "id": "E",
+        "nome": "Ristorazione Collettiva e Contract",
+        "sottocategorie": [
+          { "id": "E1", "nome": "Mensa Aziendale / Scolastica / Ospedaliera", "prezzo_pasto_eur": { "min": 4, "max": 12 } },
+          { "id": "E2", "nome": "Catering per Eventi / Banqueting" },
+          { "id": "E3", "nome": "Ristorazione nei Trasporti", "note": "Aeroporti, autogrill, stazioni, bordo treni" }
+        ]
+      },
+      {
+        "id": "F",
+        "nome": "Format Ibridi ed Emergenti",
+        "sottocategorie": [
+          { "id": "F1", "nome": "Mercato / Food Hall" },
+          { "id": "F2", "nome": "Ristorante con Retail" },
+          { "id": "F3", "nome": "Agriturismo / Farm-to-Table" },
+          { "id": "F4", "nome": "Pop-up / Temporary Restaurant" }
+        ]
+      }
+    ]
+  },
+
+  "kpi": [
+
+    {
+      "id": "KPI-G01",
+      "nome": "Incasso Giornaliero",
+      "nome_en": "Daily Revenue",
+      "frequenza": "giornaliera",
+      "categorie_applicabili": ["A","B","C","D","E","F"],
+      "definizione": "Totale ricavi da vendita cibo e bevande in una singola giornata, al netto di IVA.",
+      "formula": {
+        "testo": "Incasso Giornaliero = Σ(tutti gli scontrini del giorno) - IVA",
+        "variabili": {
+          "scontrini_giorno": "Totale lordo IVA inclusa di tutti gli scontrini emessi",
+          "IVA": "10% per somministrazione alimenti e bevande in Italia (DPR 633/1972)"
+        }
+      },
+      "come_trovare_il_dato": [
+        "Registro di cassa / POS: scontrini emessi a fine giornata",
+        "Software gestionale (Lightspeed, Square, Cassa in Cloud, Tilby): report giornaliero automatico",
+        "Manuale: somma fisica scontrini, poi dividi per 1.10 per estrarre l'imponibile"
+      ],
+      "esempio_pratico": {
+        "scenario": "Ristorante 40 coperti, sabato sera",
+        "calcolo": "38 coperti × 42€ scontrino medio = 1.596€ lordi. Netto IVA: 1.596 / 1.10 = 1.451€",
+        "risultato": "Incasso giornaliero = 1.451€"
+      },
+      "benchmark": {
+        "categoria_riferimento": "A2 – Casual Dining, 40–80 coperti, Italia",
+        "soglie": [
+          { "label": "Eccellente", "colore": "verde", "condizione": ">1.800€/giorno (media settimanale)" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "1.200–1.800€" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "800–1.200€" },
+          { "label": "Critico", "colore": "rosso", "condizione": "<800€" }
+        ],
+        "certificazione": "STIMA_SETTORE",
+        "note_certificazione": "Range derivato da letteratura operativa. FIPE 2025 riporta scontrino medio fuori casa di 10,40€ su 8 miliardi di visite, ma non disaggrega per tipologia di locale.",
+        "fonte_principale": "FIPE_2025"
+      },
+      "variazioni_paese": [
+        { "paese": "FR", "variazione": "+20–30% vs Italia", "motivo": "Scontrino medio strutturalmente più alto", "certificazione": "STIMA_SETTORE" },
+        { "paese": "DE", "variazione": "–10–15%", "motivo": "Scontrino più basso, compensato dai volumi", "certificazione": "STIMA_SETTORE" },
+        { "paese": "UK", "variazione": "+40–60% (Londra)", "motivo": "Costo della vita molto elevato", "certificazione": "STIMA_SETTORE" },
+        { "paese": "ES", "variazione": "–15–20%", "motivo": "Prezzi più bassi fuori dai grandi centri", "certificazione": "STIMA_SETTORE" }
+      ]
+    },
+
+    {
+      "id": "KPI-G02",
+      "nome": "Numero Coperti",
+      "nome_en": "Daily Covers",
+      "frequenza": "giornaliera",
+      "categorie_applicabili": ["A","B","F"],
+      "definizione": "Numero totale di pasti serviti in una giornata. Un coperto = un commensale servito.",
+      "formula": {
+        "testo": "Coperti Giornalieri = Coperti Pranzo + Coperti Cena",
+        "derivato": "Tasso Occupazione = Coperti Totali / (Posti a Sedere × Numero Turni Teorici)"
+      },
+      "come_trovare_il_dato": [
+        "POS / Sistema comande: conta automatica degli ospiti per tavolo",
+        "Sistema prenotazioni (TheFork, OpenTable): numero pax per prenotazione",
+        "Manuale: conteggio fisico delle comande con numero pax indicato"
+      ],
+      "esempio_pratico": {
+        "scenario": "Ristorante 50 posti",
+        "calcolo": "Pranzo 22 + Cena 48 = 70 coperti totali. Tasso: 70 / (50×2) = 70%",
+        "risultato": "70 coperti, tasso occupazione 70%"
+      },
+      "benchmark": {
+        "categoria_riferimento": "A2/A3 – FSR Italia",
+        "soglie_tasso_occupazione": [
+          { "label": "Eccellente", "colore": "verde", "condizione": ">75% media settimanale" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "55–75%" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "35–55%" },
+          { "label": "Critico", "colore": "rosso", "condizione": "<35%" }
+        ],
+        "certificazione": "STIMA_SETTORE",
+        "note_certificazione": "Range operativo ampiamente condiviso nella letteratura HoReCa. Non esiste una fonte primaria ufficiale europea che pubblichi tassi di occupazione medi per tipologia."
+      }
+    },
+
+    {
+      "id": "KPI-G03",
+      "nome": "Scontrino Medio",
+      "nome_en": "Average Per Cover (APC)",
+      "frequenza": "giornaliera",
+      "categorie_applicabili": ["A","B","C","D","F"],
+      "definizione": "Spesa media per persona in un singolo pasto. Indicatore chiave di posizionamento e upselling.",
+      "formula": {
+        "testo": "Scontrino Medio = Incasso Netto Giornaliero / Numero Coperti"
+      },
+      "come_trovare_il_dato": [
+        "Report POS: voce 'media per coperto' o 'average ticket'",
+        "Manuale: incasso totale netto diviso coperti totali"
+      ],
+      "esempio_pratico": {
+        "calcolo": "1.451€ / 70 coperti = 20,73€",
+        "interpretazione": "Per un casual dining questo è basso. Il pranzo a 14€ ha abbassato la media serale da 28€. Azione: rivedere menu pranzo o spingere vino/dessert."
+      },
+      "benchmark": {
+        "per_tipologia_italia": [
+          { "tipologia": "A1 – Fine Dining", "range": ">85€", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "A2 – Casual Dining", "range": "30–55€", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "A3 – Trattoria", "range": "20–38€", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "A3 – Osteria / Tavola Calda", "range": "14–22€", "certificazione": "STIMA_SETTORE" }
+        ],
+        "scontrino_medio_fuori_casa_italia_2024": {
+          "valore": 10.40,
+          "valuta": "EUR",
+          "note": "Media aggregata su TUTTI i luoghi del fuori casa (bar, ristoranti, fast food ecc.). Non confrontabile con scontrino ristorante singolo.",
+          "certificazione": "CERTIFICATO",
+          "fonte": "FIPE_2025",
+          "citazione": "Lo scontrino medio rilevato dall'indagine AFH Consumer Tracking nel 2024 è stato pari a 10,40 euro su circa 8 miliardi di visite"
+        },
+        "per_paese_casual_dining_equivalente": [
+          { "paese": "IT", "range": "28–45€", "certificazione": "STIMA_SETTORE" },
+          { "paese": "FR", "range": "32–55€", "certificazione": "STIMA_SETTORE" },
+          { "paese": "DE", "range": "25–42€", "certificazione": "STIMA_SETTORE" },
+          { "paese": "UK", "range": "38–65€", "certificazione": "STIMA_SETTORE" },
+          { "paese": "ES", "range": "22–38€", "certificazione": "STIMA_SETTORE" }
+        ]
+      }
+    },
+
+    {
+      "id": "KPI-G04",
+      "nome": "Food Waste Giornaliero",
+      "nome_en": "Daily Waste %",
+      "frequenza": "giornaliera",
+      "categorie_applicabili": ["A","B","C","D","E"],
+      "definizione": "Percentuale di cibo acquistato o preparato che viene scartata senza generare ricavi.",
+      "formula": {
+        "testo": "Waste % = (Valore Cibo Sprecato / Valore Cibo Acquistato) × 100"
+      },
+      "come_trovare_il_dato": [
+        "Pesare fisicamente gli scarti a fine giornata e moltiplicare per il prezzo medio di acquisto",
+        "Formula inventario: (stock apertura + acquisti) - vendite teoriche - stock chiusura",
+        "App dedicate: Winnow, Leanpath, Too Good To Go Business"
+      ],
+      "esempio_pratico": {
+        "calcolo": "Scarti pesati 42€ di valore / Acquisti 280€ = 15%",
+        "interpretazione": "Troppo alto. Cause probabili: sovraproduzione, porzioni non calibrate, mancato utilizzo avanzi."
+      },
+      "benchmark": {
+        "soglie": [
+          { "label": "Eccellente", "colore": "verde", "condizione": "<5%" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "5–8%" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "8–15%" },
+          { "label": "Critico", "colore": "rosso", "condizione": ">15%" }
+        ],
+        "certificazione": "STIMA_SETTORE",
+        "note_certificazione": "Champions 12.3 ha condotto uno studio su 114 ristoranti in 12 paesi (citato in letteratura di settore) ma i dati dettagliati per soglia non sono pubblicamente accessibili nella granularità richiesta."
+      }
+    },
+
+    {
+      "id": "KPI-G05",
+      "nome": "Turni Tavolo",
+      "nome_en": "Table Turnover Rate",
+      "frequenza": "giornaliera",
+      "categorie_applicabili": ["A","B"],
+      "definizione": "Numero medio di volte in cui ogni tavolo viene occupato durante un singolo servizio.",
+      "formula": {
+        "testo": "Turni Tavolo = Coperti Serviti / Posti a Sedere Disponibili",
+        "nota": "Calcolare separatamente per pranzo e per cena"
+      },
+      "come_trovare_il_dato": [
+        "Sistema prenotazioni: conta prenotazioni per tavolo per slot",
+        "POS: numero di 'aperture tavolo' per slot orario",
+        "Manuale: conteggio fisico durante il servizio"
+      ],
+      "esempio_pratico": {
+        "calcolo": "85 coperti serviti / 60 posti = 1,42 turni per servizio"
+      },
+      "benchmark": {
+        "per_tipologia": [
+          { "tipologia": "A1 – Fine Dining", "turni_ottimali": "1,0–1,2", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "A2 – Casual Dining", "turni_ottimali": "1,3–1,8", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "A3 – Trattoria", "turni_ottimali": "1,5–2,0", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "B2 – Fast Casual", "turni_ottimali": "2,5–4,0", "certificazione": "STIMA_SETTORE" }
+        ]
+      }
+    },
+
+    {
+      "id": "KPI-S01",
+      "nome": "Food Cost %",
+      "nome_en": "Cost of Goods Sold (COGS) %",
+      "frequenza": "settimanale",
+      "categorie_applicabili": ["A","B","C","D","E","F"],
+      "definizione": "Percentuale del fatturato consumata in materie prime alimentari. Il KPI più monitorato in assoluto nella ristorazione.",
+      "formula": {
+        "semplice": "Food Cost % = (Acquisti Materie Prime / Fatturato Cibo) × 100",
+        "precisa_con_inventario": "Food Cost % = [(Inventario Inizio + Acquisti - Inventario Fine) / Vendite Cibo] × 100",
+        "nota": "La formula con inventario è più accurata. Quella semplice è utile per il monitoraggio settimanale rapido."
+      },
+      "come_trovare_il_dato": [
+        "Fatture fornitori della settimana → totale acquisti food (separare da bevande)",
+        "Report POS → fatturato cibo (voce separata da bevande)",
+        "Inventario fisico ogni lunedì mattina (richiede 20–30 minuti)"
+      ],
+      "esempio_pratico": {
+        "dati": { "fatturato_cibo": 8200, "acquisti": 2706, "inv_inizio": 820, "inv_fine": 750 },
+        "calcolo": "(820 + 2706 - 750) / 8200 × 100 = 33,9%",
+        "interpretazione": "Leggermente sopra target per un casual dining. Azione: analizzare voci ad alto costo, rivedere porzioni, rinegoziare fornitori."
+      },
+      "benchmark": {
+        "range_globale_2024": {
+          "valore": "28–35%",
+          "certificazione": "CERTIFICATO",
+          "fonte": "VANTA_2024",
+          "citazione": "Food cost percentage benchmarks: 28–35% average (2024). Industry standards suggest keeping food costs between 28% and 35% of total sales to ensure profitability."
+        },
+        "per_tipologia_europa": [
+          {
+            "tipologia": "A1 – Fine Dining",
+            "target": "28–33%",
+            "soglia_attenzione": ">35%",
+            "soglia_critica": ">40%",
+            "certificazione": "STIMA_SETTORE",
+            "note": "Il fine dining USA riportato a 32–35% (VantaInsights 2024); adattato al contesto europeo."
+          },
+          {
+            "tipologia": "A2 – Casual Dining",
+            "target": "25–30%",
+            "soglia_attenzione": ">33%",
+            "soglia_critica": ">38%",
+            "certificazione": "STIMA_SETTORE",
+            "note": "Casual dining USA a 30–34% (VantaInsights); Europa leggermente inferiore per struttura costi diversa."
+          },
+          {
+            "tipologia": "A3 – Trattoria",
+            "target": "28–34%",
+            "soglia_attenzione": ">37%",
+            "soglia_critica": ">42%",
+            "certificazione": "STIMA_SETTORE"
+          },
+          {
+            "tipologia": "B1 – Pizzeria",
+            "target": "22–28%",
+            "soglia_attenzione": ">31%",
+            "soglia_critica": ">36%",
+            "certificazione": "STIMA_SETTORE",
+            "note": "Ingredienti a basso costo compensati da alta rotazione. Range basato su letteratura operativa italiana."
+          },
+          {
+            "tipologia": "C1 – Bar (cibo)",
+            "target": "20–28%",
+            "soglia_attenzione": ">32%",
+            "soglia_critica": ">38%",
+            "certificazione": "STIMA_SETTORE"
+          }
+        ],
+        "nota_inflazione": {
+          "testo": "Nel triennio 2022–2024, i prezzi della ristorazione in Italia sono cresciuti del 14,6%. I benchmark storici di food cost si sono spostati verso l'alto di 2–4 punti percentuali rispetto ai valori pre-pandemia.",
+          "certificazione": "CERTIFICATO",
+          "fonte": "FIPE_2025"
+        },
+        "nota_europa": "In UK e Francia il food cost tende a essere 2–4 punti % più alto per via del costo delle materie prime. Certificazione: STIMA_SETTORE."
+      }
+    },
+
+    {
+      "id": "KPI-S02",
+      "nome": "Beverage Cost %",
+      "nome_en": "Drink Cost Percentage",
+      "frequenza": "settimanale",
+      "categorie_applicabili": ["A","B","C","D"],
+      "formula": {
+        "testo": "Beverage Cost % = (Acquisti Bevande / Fatturato Bevande) × 100"
+      },
+      "benchmark": {
+        "per_beverage": [
+          { "tipo": "Vino", "target": "28–38%", "soglia_attenzione": ">42%", "certificazione": "STIMA_SETTORE", "note": "Markup tipico 3x sul prezzo di acquisto = ~33% cost" },
+          { "tipo": "Birra", "target": "18–25%", "soglia_attenzione": ">30%", "certificazione": "STIMA_SETTORE" },
+          { "tipo": "Cocktail", "target": "15–22%", "soglia_attenzione": ">28%", "certificazione": "STIMA_SETTORE" },
+          { "tipo": "Soft Drink / Acqua", "target": "8–15%", "soglia_attenzione": ">20%", "certificazione": "STIMA_SETTORE" },
+          { "tipo": "Mix totale beverage", "target": "20–30%", "soglia_attenzione": ">35%", "certificazione": "STIMA_SETTORE" }
+        ]
+      }
+    },
+
+    {
+      "id": "KPI-S03",
+      "nome": "Labor Cost %",
+      "nome_en": "Labor Cost Percentage",
+      "frequenza": "settimanale",
+      "categorie_applicabili": ["A","B","C","D","E","F"],
+      "definizione": "Percentuale del fatturato assorbita dal costo totale del personale, comprensivo di contributi e TFR.",
+      "formula": {
+        "testo": "Labor Cost % = (Costo Totale Personale / Fatturato Totale) × 100",
+        "componenti_costo_personale": [
+          "Stipendi lordi",
+          "Contributi INPS a carico azienda (~28–32% del lordo in IT)",
+          "Premio INAIL",
+          "TFR accantonamento (~8,33% del lordo)",
+          "Maggiorazioni CCNL (notturni, festivi, straordinari)",
+          "Costo turnover e formazione"
+        ],
+        "fonte_componenti": "CCNL_FIPE_2024"
+      },
+      "come_trovare_il_dato": [
+        "Buste paga mensili divise per 4,33 per ottenere il dato settimanale",
+        "Ore lavorate × costo orario lordo (incluso cuneo fiscale 35–40%)",
+        "Software HR (Zucchetti, TeamSystem, JetHR) → report settimanale",
+        "Tabelle Ministero del Lavoro D.D. 63/2025 per costo orario ufficiale per livello CCNL"
+      ],
+      "benchmark": {
+        "dati_verificati_nra_2024": {
+          "full_service_mediana_totale": "36,5%",
+          "full_service_operatori_in_utile": "34,2%",
+          "full_service_operatori_in_perdita": "42,9%",
+          "limited_service_mediana_totale": "31,7%",
+          "limited_service_operatori_in_utile": "30,0%",
+          "limited_service_operatori_in_perdita": "34,1%",
+          "certificazione": "CERTIFICATO",
+          "fonte": "NRA_2025",
+          "citazione": "NRA Restaurant Operations Data Abstract 2025, basato su dati finanziari di oltre 900 operatori USA 2024",
+          "nota_adattamento": "Dati USA. In Europa il labor cost è strutturalmente più alto per contributi datoriali obbligatori più elevati."
+        },
+        "per_tipologia_italia": [
+          { "tipologia": "A1 – Fine Dining", "target": "30–38%", "soglia_attenzione": ">42%", "soglia_critica": ">48%", "certificazione": "STIMA_SETTORE", "fonte_orientativa": "NRA_2025 adattato" },
+          { "tipologia": "A2 – Casual Dining", "target": "28–35%", "soglia_attenzione": ">38%", "soglia_critica": ">45%", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "A3 – Trattoria", "target": "25–32%", "soglia_attenzione": ">36%", "soglia_critica": ">42%", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "B1 – Pizzeria", "target": "22–28%", "soglia_attenzione": ">32%", "soglia_critica": ">38%", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "C1 – Bar", "target": "20–28%", "soglia_attenzione": ">32%", "soglia_critica": ">40%", "certificazione": "STIMA_SETTORE", "fonte_orientativa": "JetHR benchmark IT 2025" },
+          { "tipologia": "D1 – Dark Kitchen", "target": "15–22%", "soglia_attenzione": ">26%", "soglia_critica": ">32%", "certificazione": "STIMA_SETTORE" }
+        ],
+        "nota_europa": {
+          "testo": "In Francia il costo totale del lavoro (inclusi contributi datoriali) rappresenta il 140–145% del lordo; in Germania il 135–140%. Questo rende il labor cost % sul fatturato strutturalmente più alto di 3–6 punti rispetto all'Italia.",
+          "certificazione": "CERTIFICATO",
+          "fonte": "ZABELLA_2026",
+          "url_fonte": "https://www.zabella.net/blog/average-restaurant-profit-margin"
+        },
+        "nota_uk": {
+          "testo": "In UK il labor cost è strutturalmente più alto per il salario minimo più elevato. I benchmark NRA 2025 mostrano tendenza simile: aggiungere 3–5 punti % ai benchmark italiani.",
+          "certificazione": "STIMA_SETTORE"
+        }
+      }
+    },
+
+    {
+      "id": "KPI-S04",
+      "nome": "Prime Cost %",
+      "nome_en": "Prime Cost Percentage",
+      "frequenza": "settimanale",
+      "categorie_applicabili": ["A","B","C","D","E","F"],
+      "definizione": "Somma di food cost + beverage cost + labor cost. Il nocciolo duro dei costi variabili e il KPI sintetico più importante per la sostenibilità economica.",
+      "formula": {
+        "testo": "Prime Cost % = Food Cost % + Beverage Cost % + Labor Cost %"
+      },
+      "benchmark": {
+        "range_target": {
+          "valore": "55–65%",
+          "certificazione": "CERTIFICATO",
+          "fonte": "VANTA_2024",
+          "citazione": "Prime cost typically runs 55–65% of revenue for a well-managed restaurant. Prime cost is the more complete operational metric because it captures the two expenses operators have the most control over."
+        },
+        "soglie": [
+          { "label": "Eccellente", "colore": "verde", "condizione": "<58%", "note": "Margine operativo molto sano" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "58–65%" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "65–72%", "note": "Poco spazio per costi fissi" },
+          { "label": "Critico", "colore": "rosso", "condizione": ">72%", "note": "Perdita quasi certa" }
+        ],
+        "certificazione_soglie": "STIMA_SETTORE",
+        "nota": "Il range 55–65% è certificato. Le soglie di semaforo specifiche sono elaborazione operativa."
+      }
+    },
+
+    {
+      "id": "KPI-S05",
+      "nome": "RevPASH",
+      "nome_en": "Revenue Per Available Seat Hour",
+      "frequenza": "settimanale",
+      "categorie_applicabili": ["A","B"],
+      "definizione": "Fatturato generato per ogni posto a sedere disponibile per ogni ora di apertura. KPI di efficienza spaziale, derivato dal RevPAR alberghiero.",
+      "formula": {
+        "testo": "RevPASH = Fatturato Periodo / (Posti a Sedere × Ore Servizio Periodo)"
+      },
+      "esempio_pratico": {
+        "sabato": "2.100€ / (60 posti × 3,5h) = 10,00€/ora",
+        "venerdi": "1.260€ / (60 posti × 3,5h) = 6,00€/ora",
+        "interpretazione": "Il sabato è il 67% più efficiente del venerdì in utilizzo dello spazio."
+      },
+      "benchmark": {
+        "casual_dining_cena": [
+          { "label": "Eccellente", "colore": "verde", "condizione": ">12€/ora" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "8–12€" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "5–8€" },
+          { "label": "Critico", "colore": "rosso", "condizione": "<5€" }
+        ],
+        "certificazione": "STIMA_SETTORE",
+        "note_certificazione": "Il concetto di RevPASH è documentato in letteratura accademica (Kimes, Cornell University). I range specifici per il contesto europeo sono stime operative."
+      }
+    },
+
+    {
+      "id": "KPI-S06",
+      "nome": "Produttività per Ora Lavorata",
+      "nome_en": "Revenue Per Labor Hour",
+      "frequenza": "settimanale",
+      "categorie_applicabili": ["A","B","C","D","E"],
+      "formula": {
+        "testo": "Revenue Per Labor Hour = Fatturato Settimana / Totale Ore Lavorate Settimana"
+      },
+      "benchmark": {
+        "nota_strutturale": {
+          "testo": "La produttività della ristorazione italiana è in media il 41% inferiore alla media generale degli altri settori economici.",
+          "certificazione": "CERTIFICATO",
+          "fonte": "FIPE_2024",
+          "citazione": "Bassa produttività: molto sotto la media generale degli altri settori (in media 41% in meno). – Rapporto Ristorazione FIPE 2024"
+        },
+        "soglie_operativo": [
+          { "label": "Eccellente", "colore": "verde", "condizione": ">55€/ora" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "40–55€" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "28–40€" },
+          { "label": "Critico", "colore": "rosso", "condizione": "<28€" }
+        ],
+        "certificazione_soglie": "STIMA_SETTORE"
+      }
+    },
+
+    {
+      "id": "KPI-M01",
+      "nome": "EBITDA e EBITDA Margin",
+      "frequenza": "mensile",
+      "categorie_applicabili": ["A","B","C","D","E","F"],
+      "definizione": "Earnings Before Interest, Taxes, Depreciation and Amortization. Margine operativo lordo prima degli oneri finanziari e fiscali.",
+      "formula": {
+        "testo": "EBITDA = Fatturato - Food Cost - Beverage Cost - Labor Cost - Costi Fissi Operativi",
+        "margin": "EBITDA Margin % = (EBITDA / Fatturato) × 100",
+        "costi_fissi_operativi": ["Affitto/leasing", "Utenze", "Manutenzione", "Software gestionali", "Marketing", "Assicurazioni", "Consumabili", "Pulizie"]
+      },
+      "benchmark": {
+        "mediana_europa_aziende_quotate": {
+          "valore": "13%",
+          "certificazione": "CERTIFICATO",
+          "fonte": "LINEUP_AI_2024",
+          "citazione": "The average restaurant profit margin varies across regions. In Europe (including the UK), the median EBITDA margins for public foodservice companies are 13%."
+        },
+        "range_generale": {
+          "valore": "12–30%",
+          "certificazione": "CERTIFICATO",
+          "fonte": "RESTROWORKS_2026",
+          "url": "https://www.restroworks.com/blog/restaurant-profitability-statistics/",
+          "citazione": "On average, the EBITDA margin for restaurants falls between 12%–30% of their sales."
+        },
+        "per_tipologia": [
+          { "tipologia": "A1/A2 – Full Service Restaurant", "range": "10–15%", "certificazione": "STIMA_SETTORE", "fonte_orientativa": "VASTCFO_2025: full-service restaurants land in 10–15% EBITDA range" },
+          { "tipologia": "B1 – QSR", "range": "15–25%", "certificazione": "STIMA_SETTORE", "fonte_orientativa": "VASTCFO_2025: QSRs usually hit 15–25% EBITDA margins" },
+          { "tipologia": "D1 – Dark Kitchen", "range": "12–20%", "certificazione": "STIMA_SETTORE" }
+        ],
+        "per_paese_casual_dining": [
+          { "paese": "IT", "range": "10–18%", "certificazione": "STIMA_SETTORE" },
+          { "paese": "FR", "range": "8–15%", "certificazione": "STIMA_SETTORE" },
+          { "paese": "DE", "range": "10–16%", "certificazione": "STIMA_SETTORE" },
+          { "paese": "UK", "range": "6–13%", "certificazione": "STIMA_SETTORE", "note": "Affitti strutturalmente più alti. UK snapshot net margin ~4,2% nel 2024 (CLFI 2026)." },
+          { "paese": "ES", "range": "12–20%", "certificazione": "STIMA_SETTORE" }
+        ],
+        "semaforo": [
+          { "label": "Eccellente", "colore": "verde", "condizione": ">20%" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "12–20%" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "6–12%" },
+          { "label": "Critico", "colore": "rosso", "condizione": "<6%" },
+          { "label": "Perdita operativa", "colore": "rosso_scuro", "condizione": "Negativo" }
+        ],
+        "certificazione_semaforo": "STIMA_SETTORE"
+      }
+    },
+
+    {
+      "id": "KPI-M02",
+      "nome": "Break-Even Point Mensile",
+      "frequenza": "mensile",
+      "categorie_applicabili": ["A","B","C","D","F"],
+      "definizione": "Il fatturato minimo mensile necessario per coprire tutti i costi e non andare in perdita.",
+      "formula": {
+        "testo": "Break-Even = Costi Fissi Mensili / (1 - Costi Variabili % su Fatturato)",
+        "nota": "I costi fissi includono tutto ciò che si paga anche col locale chiuso: affitto, stipendi base garantiti, utenze fisse, assicurazioni."
+      },
+      "esempio_pratico": {
+        "costi_fissi": 7800,
+        "costi_variabili_perc": 0.52,
+        "break_even": "7.800 / (1 - 0,52) = 16.250€/mese",
+        "traduzione_operativa": "Con 24 giorni lavorativi: 677€/giorno minimo. Con 50 coperti e scontrino medio 32€: almeno 21 coperti/giorno."
+      },
+      "benchmark": {
+        "certificazione": "STIMA_MODELLO",
+        "note": "Il concetto è universalmente riconosciuto in finanza aziendale. I valori di esempio sono illustrativi e variano completamente per ogni singolo esercizio."
+      }
+    },
+
+    {
+      "id": "KPI-M03",
+      "nome": "Cash Flow Operativo",
+      "frequenza": "mensile",
+      "categorie_applicabili": ["A","B","C","D","E","F"],
+      "formula": {
+        "testo": "Cash Flow Operativo = Incassi Effettivi del Mese - Uscite Effettive del Mese",
+        "attenzione": "Distinguere competenza (P&L) da cassa effettiva. Il F24 dei contributi va a competenza del mese in cui si lavora ma si paga il mese successivo."
+      },
+      "benchmark": {
+        "soglie": [
+          { "label": "Eccellente", "colore": "verde", "condizione": "Positivo e >10% del fatturato" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "Positivo e 3–10%" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "Positivo ma <3%" },
+          { "label": "Critico", "colore": "rosso", "condizione": "Negativo" }
+        ],
+        "certificazione": "STIMA_SETTORE"
+      }
+    },
+
+    {
+      "id": "KPI-M04",
+      "nome": "Incidenza Affitto",
+      "nome_en": "Rent-to-Revenue Ratio",
+      "frequenza": "mensile",
+      "categorie_applicabili": ["A","B","C","D","F"],
+      "formula": {
+        "testo": "Rent % = Canone Mensile / Fatturato Mensile × 100"
+      },
+      "benchmark": {
+        "range_target_generale": {
+          "valore": "5–8%",
+          "certificazione": "CERTIFICATO",
+          "fonte": "RESTROWORKS_2026",
+          "citazione": "It is generally recommended to maintain a rent-to-revenue ratio between 5–8%, though it can vary depending on location and market dynamics."
+        },
+        "soglie": [
+          { "label": "Eccellente", "colore": "verde", "condizione": "<8%" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "8–12%" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "12–15%" },
+          { "label": "Critico", "colore": "rosso", "condizione": ">15%" }
+        ],
+        "nota_grandi_citta": "In Milano, Londra, Parigi la soglia critica si sposta a >18% per canoni eccezionalmente elevati. Certificazione: STIMA_SETTORE.",
+        "certificazione_soglie": "STIMA_SETTORE"
+      }
+    },
+
+    {
+      "id": "KPI-M05",
+      "nome": "Costo Pasto Prodotto",
+      "nome_en": "Plate Cost / Recipe Cost",
+      "frequenza": "mensile",
+      "categorie_applicabili": ["A","B","C","D","E"],
+      "formula": {
+        "testo": "Costo Piatto = Σ(Quantità Ingrediente × Prezzo Unitario Ingrediente)",
+        "prezzo_vendita": "Prezzo Vendita Target = Costo Piatto / Food Cost % Target",
+        "moltiplicatore": "Moltiplicatore = 1 / Food Cost % Target"
+      },
+      "esempio_pratico_tagliatelle_ragu": {
+        "ingredienti": [
+          { "nome": "Tagliatelle fresche", "quantita_g": 120, "prezzo_kg": 2.80, "costo": 0.34 },
+          { "nome": "Ragù (manzo+maiale+pomodoro)", "quantita_g": 150, "prezzo_kg": 9.50, "costo": 1.43 },
+          { "nome": "Parmigiano Reggiano", "quantita_g": 15, "prezzo_kg": 18.00, "costo": 0.27 },
+          { "nome": "Burro", "quantita_g": 5, "prezzo_kg": 7.00, "costo": 0.04 },
+          { "nome": "Olio, sale, spezie", "quantita_g": null, "costo_stimato": 0.05 }
+        ],
+        "costo_piatto_totale": 2.13,
+        "prezzo_vendita_minimo_fc28": 7.61,
+        "prezzo_vendita_consigliato": "10–12€"
+      },
+      "benchmark": {
+        "certificazione": "STIMA_MODELLO",
+        "note": "Il calcolo del plate cost è uno standard operativo universale. I valori dipendono completamente dai prezzi di acquisto locali."
+      }
+    },
+
+    {
+      "id": "KPI-M06",
+      "nome": "Menu Engineering Index",
+      "nome_en": "Menu Engineering Matrix (Kasavana & Smith)",
+      "frequenza": "mensile",
+      "categorie_applicabili": ["A","B","C"],
+      "definizione": "Classifica ogni piatto del menu in 4 quadranti basati su popolarità (volume vendite) e margine contributivo.",
+      "quadranti": [
+        { "nome": "STAR", "emoji": "⭐", "criteri": "Alta popolarità + Alto margine", "azione": "Mantieni, promuovi, posiziona in evidenza nel menu" },
+        { "nome": "PLOW HORSE", "emoji": "🟠", "criteri": "Alta popolarità + Basso margine", "azione": "Aumenta prezzo o riduci costo ingredienti" },
+        { "nome": "PUZZLE", "emoji": "🟡", "criteri": "Bassa popolarità + Alto margine", "azione": "Migliora posizionamento visivo o rimuovi" },
+        { "nome": "DOG", "emoji": "🔴", "criteri": "Bassa popolarità + Basso margine", "azione": "Elimina o sostituisci completamente" }
+      ],
+      "formula": {
+        "soglia_popolarita": "Soglia = (100% / N° Piatti) × 0,70",
+        "margine_contributivo": "Margine = Prezzo Vendita - Costo Piatto",
+        "margine_medio": "Media = Σ(Margini × Unità Vendute) / Totale Unità"
+      },
+      "benchmark": {
+        "certificazione": "CERTIFICATO",
+        "note": "Metodologia Kasavana & Smith (1982), Cornell Hotel and Restaurant Administration Quarterly. Standard accademico ampiamente validato e adottato globalmente."
+      }
+    },
+
+    {
+      "id": "KPI-A01",
+      "nome": "Utile Netto",
+      "nome_en": "Net Profit Margin",
+      "frequenza": "annuale",
+      "categorie_applicabili": ["A","B","C","D","E","F"],
+      "formula": {
+        "testo": "Utile Netto = EBITDA - Ammortamenti - Interessi Passivi - Imposte (IRES + IRAP)",
+        "margin": "Net Profit Margin % = Utile Netto / Fatturato × 100"
+      },
+      "benchmark": {
+        "range_settore_2024": {
+          "full_service": "3–5%",
+          "qsr_fast_casual": "6–9%",
+          "bar": "7–12%",
+          "certificazione": "CERTIFICATO",
+          "fonte": "VANTA_2024",
+          "citazione": "Average restaurant net profit margin is 3–9% (2024). Bar: 7–12% net margin. Fast food: 6–9% net margin."
+        },
+        "uk_snapshot_2024": {
+          "valore": "~4,2%",
+          "certificazione": "CERTIFICATO",
+          "fonte": "CLFI_2026",
+          "url": "https://clfi.co.uk/resources/restaurant-profit-margins/",
+          "citazione": "UK snapshot ≈ 4.2% net margin (2024)"
+        },
+        "semaforo": [
+          { "label": "Eccellente", "colore": "verde", "condizione": ">10%" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "5–10%" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "2–5%" },
+          { "label": "Critico", "colore": "rosso", "condizione": "<2%" },
+          { "label": "Perdita", "colore": "rosso_scuro", "condizione": "Negativo" }
+        ],
+        "certificazione_semaforo": "STIMA_SETTORE"
+      }
+    },
+
+    {
+      "id": "KPI-A02",
+      "nome": "Lifetime Value Cliente",
+      "nome_en": "Customer Lifetime Value (LTV)",
+      "frequenza": "annuale",
+      "categorie_applicabili": ["A","B","C","F"],
+      "formula": {
+        "lordo": "LTV = Scontrino Medio × Frequenza Visite Annua × Anni di Fedeltà Media",
+        "netto": "LTV Netto = LTV × Margine Contributivo Medio %"
+      },
+      "come_trovare_il_dato": [
+        "Sistema prenotazioni (TheFork, OpenTable, Resy): storico visite per cliente registrato",
+        "Programma fedeltà / CRM: frequenza e spesa media per cliente tracciato",
+        "Survey campione: intervistare 30 clienti abituali ('Ogni quanto venite?' 'Da quanti anni?')"
+      ],
+      "benchmark": {
+        "per_tipologia": [
+          { "tipologia": "A1 – Fine Dining", "ltv_lordo_tipico": "1.800–4.000€", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "A2 – Casual Dining", "ltv_lordo_tipico": "800–1.800€", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "A3 – Trattoria", "ltv_lordo_tipico": "500–1.200€", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "C1 – Bar (habitué)", "ltv_lordo_tipico": "600–1.500€", "nota": "Alta frequenza, basso scontrino", "certificazione": "STIMA_SETTORE" },
+          { "tipologia": "B1 – Pizzeria", "ltv_lordo_tipico": "400–900€", "certificazione": "STIMA_SETTORE" }
+        ],
+        "nota_certificazione": "Non esistono fonti primarie pubbliche che riportino LTV per tipologia di ristorante in Europa. I range sono stime basate su scontrino medio × frequenza tipica × fedeltà media per tipologia."
+      }
+    },
+
+    {
+      "id": "KPI-A03",
+      "nome": "Net Promoter Score",
+      "nome_en": "NPS",
+      "frequenza": "annuale",
+      "categorie_applicabili": ["A","B","C","D","F"],
+      "definizione": "Misura la propensione dei clienti a raccomandare il ristorante. Scala 0–10.",
+      "formula": {
+        "testo": "NPS = % Promotori (voto 9–10) − % Detrattori (voto 0–6)",
+        "categorie": {
+          "promotori": "Voto 9–10",
+          "passivi": "Voto 7–8 (non entrano nel calcolo)",
+          "detrattori": "Voto 0–6"
+        }
+      },
+      "come_raccoglierlo": [
+        "Questionario su tablet/QR code al momento del conto (Typeform, Google Forms)",
+        "Google Reviews: rielabora ★★★★★=10, ★★★★=8, ★★★=6, ★★=4, ★=2",
+        "TripAdvisor: stessa conversione di scala"
+      ],
+      "benchmark": {
+        "ristorazione": [
+          { "label": "Eccellente", "colore": "verde", "condizione": ">60" },
+          { "label": "Molto buono", "colore": "verde_chiaro", "condizione": "40–60" },
+          { "label": "Nella media", "colore": "giallo", "condizione": "20–40" },
+          { "label": "Da migliorare", "colore": "arancione", "condizione": "0–20" },
+          { "label": "Crisi reputazionale", "colore": "rosso", "condizione": "Negativo" }
+        ],
+        "certificazione": "STIMA_SETTORE",
+        "note": "La metodologia NPS è certificata (Reichheld, Harvard Business Review 2003). I benchmark specifici per la ristorazione europea sono stime operative."
+      }
+    },
+
+    {
+      "id": "KPI-A04",
+      "nome": "Channel Mix – Quota Delivery vs Sala",
+      "frequenza": "annuale",
+      "categorie_applicabili": ["A","B","D"],
+      "formula": {
+        "testo": "Quota Canale % = Fatturato Canale / Fatturato Totale × 100"
+      },
+      "dati_commissioni_piattaforme": {
+        "deliveroo": {
+          "commissione_range": "25–35%",
+          "certificazione": "CERTIFICATO",
+          "fonte": "MENUVIEL_2026",
+          "citazione": "Deliveroo and UberEats are two of the most widely used food delivery platforms. Commission rates: Both platforms charge similar commission rates, typically between 25% and 35%."
+        },
+        "uber_eats": {
+          "commissione_range": "20–30%",
+          "piani": {
+            "lite": "20%",
+            "standard": "25%",
+            "premium": "30%"
+          },
+          "certificazione": "CERTIFICATO",
+          "fonte": "RESTOLABS",
+          "url": "https://www.restolabs.com/blog/uber-eats-commission-fee"
+        },
+        "just_eat": {
+          "commissione_range": "14–18%",
+          "nota": "Più basso ma con meno strumenti marketing. Permette rider propri.",
+          "certificazione": "CERTIFICATO",
+          "fonte": "MENUVIEL_2026"
+        },
+        "costo_totale_reale": {
+          "nota": "Il costo reale può superare il 40% includendo: commissione + fee pagamento 2,9–3,5% + marketing in-app opzionale + packaging dedicato.",
+          "certificazione": "CERTIFICATO",
+          "fonte": "ACTIVEMENUS_2025",
+          "url": "https://activemenus.com/the-hidden-costs-of-third-party-delivery-what-restaurant-owners-really-pay-and-how-to-calculate-your-true-roi/",
+          "citazione": "The actual cost of third-party delivery can exceed 40% of your revenue when you factor in all the hidden fees and indirect costs."
+        }
+      },
+      "benchmark_mix_canale": [
+        { "canale": "Sala", "quota_ottimale": "60–80%", "note": "Massima marginalità", "certificazione": "STIMA_SETTORE" },
+        { "canale": "Delivery piattaforme terze", "quota_max_consigliata": "<30%", "note": "Oltre è pericoloso per i margini", "certificazione": "STIMA_SETTORE" },
+        { "canale": "Delivery diretto", "quota_target": ">5%", "note": "Zero commissioni, da massimizzare", "certificazione": "STIMA_SETTORE" },
+        { "canale": "Take Away", "quota_ottimale": "5–15%", "certificazione": "STIMA_SETTORE" }
+      ],
+      "dato_mercato_italia": {
+        "quota_delivery_sul_totale_fuori_casa": "3%",
+        "trend": "Stabile ma in polarizzazione verso fruizione online",
+        "certificazione": "CERTIFICATO",
+        "fonte": "FIPE_2024",
+        "citazione": "Il food delivery è stabile al 3%, ma si sta sempre più polarizzando verso la fruizione online"
+      }
+    },
+
+    {
+      "id": "KPI-A05",
+      "nome": "ROI Investimenti",
+      "nome_en": "Return On Investment",
+      "frequenza": "annuale",
+      "categorie_applicabili": ["A","B","C","D","F"],
+      "formula": {
+        "testo": "ROI = (Beneficio Netto dell'Investimento / Costo Investimento) × 100",
+        "beneficio_netto": "Beneficio Netto = Incremento EBITDA attribuibile - Costo Ammortizzato annuo"
+      },
+      "dato_settore": {
+        "testo": "Nel 2024 il 43,2% degli imprenditori della ristorazione in Italia ha effettuato almeno un investimento, per un valore complessivo stimato di circa 2 miliardi di euro. Gli ambiti prioritari: comunicazione digitale, sistemi POS, software gestionali.",
+        "certificazione": "CERTIFICATO",
+        "fonte": "FIPE_2025"
+      },
+      "benchmark": {
+        "certificazione": "STIMA_MODELLO",
+        "note": "Il ROI varia completamente per tipo di investimento e contesto. Fornire esempi pratici contestualizzati è più utile di un range generico."
+      }
+    },
+
+    {
+      "id": "KPI-QSR01",
+      "nome": "Transazioni per Ora",
+      "nome_en": "Transactions Per Hour (TPH)",
+      "frequenza": "giornaliera",
+      "categorie_applicabili": ["B","C"],
+      "formula": {
+        "testo": "TPH = Numero Scontrini Emessi / Ore di Apertura"
+      },
+      "benchmark": {
+        "per_formato": [
+          { "formato": "B1 – Fast Food catena", "tph_target": "80–150", "certificazione": "STIMA_SETTORE" },
+          { "formato": "B2 – Fast Casual", "tph_target": "35–65", "certificazione": "STIMA_SETTORE" },
+          { "formato": "B3 – Street Food / Banco", "tph_target": "25–45", "certificazione": "STIMA_SETTORE" }
+        ]
+      }
+    },
+
+    {
+      "id": "KPI-DK01",
+      "nome": "Food Delivery Margin",
+      "nome_en": "Real Delivery Margin %",
+      "frequenza": "settimanale",
+      "categorie_applicabili": ["D","A","B"],
+      "definizione": "Il margine reale per ordine dopo aver detratto la commissione della piattaforma, il costo del piatto, il packaging e la quota labor.",
+      "formula": {
+        "testo": "Margine Reale % = [(Prezzo × (1 - Commissione%)) - Costo Piatto - Packaging - Quota Labor] / (Prezzo × (1 - Commissione%)) × 100"
+      },
+      "esempio_pratico": {
+        "piatto": "18€ su Deliveroo (commissione 30%)",
+        "ricavo_netto_piattaforma": 12.60,
+        "costo_piatto": 4.80,
+        "packaging": 0.55,
+        "quota_labor": 1.20,
+        "margine_lordo": 6.05,
+        "margine_perc_lordo": "48,0%",
+        "quota_costi_fissi_per_piatto": 2.50,
+        "margine_reale": 3.55,
+        "margine_reale_perc": "28,2%"
+      },
+      "benchmark": {
+        "soglie": [
+          { "label": "Eccellente", "colore": "verde", "condizione": ">35%" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "20–35%" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "10–20%" },
+          { "label": "Critico", "colore": "rosso", "condizione": "<10%", "note": "Rischio perdita effettiva per ordine" }
+        ],
+        "certificazione": "STIMA_SETTORE",
+        "note": "I range di commissione sono certificati (25–35% Deliveroo/Uber Eats, MENUVIEL 2026). Le soglie di margine reale sono elaborazione operativa."
+      }
+    },
+
+    {
+      "id": "KPI-COLL01",
+      "nome": "Costo Pasto Prodotto (Mensa)",
+      "nome_en": "Cost Per Meal (Collective Catering)",
+      "frequenza": "mensile",
+      "categorie_applicabili": ["E"],
+      "formula": {
+        "testo": "CPP = (Costo Materie Prime + Costo Lavoro Diretto) / Numero Pasti Prodotti"
+      },
+      "benchmark": {
+        "soglie": [
+          { "label": "Molto efficiente", "colore": "verde", "condizione": "<3,50€" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "3,50–5,00€" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "5,00–7,00€" },
+          { "label": "Critico", "colore": "rosso", "condizione": ">7,00€" }
+        ],
+        "certificazione": "STIMA_SETTORE",
+        "fonte_orientativa": "MINISTERO_LAVORO_2025",
+        "note": "Il Decreto Direttoriale 63/2025 pubblica il costo medio orario del lavoro per la ristorazione collettiva per livello CCNL, utile per calcolare la componente labor del CPP."
+      }
+    },
+
+    {
+      "id": "KPI-COLL02",
+      "nome": "Tasso di Presenza (Mensa)",
+      "nome_en": "Participation Rate",
+      "frequenza": "mensile",
+      "categorie_applicabili": ["E"],
+      "formula": {
+        "testo": "Participation Rate = Pasti Serviti / Potenziali Utenti × 100"
+      },
+      "benchmark": {
+        "soglie": [
+          { "label": "Eccellente", "colore": "verde", "condizione": ">65%" },
+          { "label": "Nella norma", "colore": "giallo", "condizione": "45–65%" },
+          { "label": "Attenzione", "colore": "arancione", "condizione": "25–45%" },
+          { "label": "Critico", "colore": "rosso", "condizione": "<25%", "note": "Il cliente potrebbe non rinnovare il contratto" }
+        ],
+        "certificazione": "STIMA_SETTORE"
+      }
+    }
+
+  ],
+
+  "dati_mercato_certificati": {
+    "italia_2024": {
+      "fonte": "FIPE_2025",
+      "valore_mercato_fuori_casa": { "valore_miliardi_eur": 96.4, "variazione_reale_2023": "+1,6%", "variazione_da_2019": "+11,3% valore / -6% volume" },
+      "imprese_attive_totale": 327850,
+      "variazione_imprese": "-1,2% vs 2023",
+      "bar_attivi": 127667,
+      "ristoranti_attivi": 195670,
+      "banqueting_catering": 3849,
+      "occupati_totale": 1500000,
+      "variazione_occupati": "+5% vs 2023",
+      "scontrino_medio_fuori_casa": 10.40,
+      "visite_totali_miliardi": 8,
+      "inflazione_ristorazione_2024": "+3,2%",
+      "inflazione_ristorazione_triennio_2022_2024": "+14,6%",
+      "imprenditori_con_investimenti_2024": "43,2%",
+      "valore_investimenti_stimato_miliardi": 2,
+      "tasso_sopravvivenza_5anni": "~50%",
+      "difficolta_reperimento_personale": "77% dei ristoranti e 70% dei bar"
+    }
+  },
+
+  "istruzioni_chatbot": {
+    "come_usare_il_database": "Per ogni KPI richiesto dall'utente, recupera: formula, come_trovare_il_dato, esempio_pratico, benchmark con soglie semaforo. Presenta sempre il livello di certificazione del benchmark. Se il dato è CERTIFICATO, cita la fonte. Se è STIMA_SETTORE, avvisa che è un range orientativo. Se è STIMA_MODELLO, spiega che dipende dal contesto specifico.",
+    "tono_consulenziale": "Usa un tono da consulente operativo. Non dare risposte solo teoriche: traduci sempre il KPI in azione concreta ('se il tuo food cost è X, il problema probabilmente è Y, verifica Z').",
+    "priorita_kpi_per_principianti": ["KPI-G01", "KPI-G02", "KPI-G03", "KPI-S01", "KPI-S03", "KPI-M01", "KPI-M02"],
+    "priorita_kpi_per_avanzati": ["KPI-S04", "KPI-S05", "KPI-S06", "KPI-M06", "KPI-A02", "KPI-A04", "KPI-DK01"],
+    "cruscotto_minimo_vitale": {
+      "dati_giornalieri": ["Incasso totale netto", "Numero coperti"],
+      "dati_settimanali": ["Fatture fornitori (totale acquisti food+bev)", "Ore lavorate personale"],
+      "calcoli_automatici_dai_4_dati": ["Food Cost %", "Labor Cost %", "Prime Cost %", "Scontrino medio", "Trend vs settimana precedente"]
+    }
+  }
+}

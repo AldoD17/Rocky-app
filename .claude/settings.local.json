@@ -24,7 +24,8 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(list\\(d['Auth'].keys\\(\\)\\)\\)\")",
       "Bash(python3 *)",
       "Bash(xargs ls -la)",
-      "mcp__supabase__get_project"
+      "mcp__supabase__get_project",
+      "Bash(git add *)"
     ]
   },
   "enableAllProjectMcpServers": true,
