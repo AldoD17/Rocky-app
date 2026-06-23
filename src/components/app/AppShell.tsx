@@ -7,6 +7,7 @@ import { MonthSummary } from "@/components/app/MonthSummary";
 import { YearSummary } from "@/components/app/YearSummary";
 import { EmployeePanel, type WorkerEntry } from "@/components/app/EmployeePanel";
 import { Dashboard } from "@/components/app/Dashboard";
+import { ExpensesScreen } from "@/components/app/ExpensesScreen";
 import { Mascot, SuggestChip } from "@/components/ui";
 import { useTranslations, useLocale } from "next-intl";import type { ChatResponse } from "@/lib/types";
 
@@ -32,6 +33,7 @@ export function AppShell({ onSettings }: { onSettings: () => void }) {
   const [showEmployeePanel, setShowEmployeePanel] = useState(false);
   const [pendingWorkers, setPendingWorkers] = useState<WorkerEntry[]>([]);
   const [showDashboard, setShowDashboard] = useState(false);
+  const [showExpenses, setShowExpenses] = useState(false);
 
   const chatViewRef = useRef<ChatViewHandle>(null);
   const restaurantId = restaurant?.id;
@@ -144,6 +146,13 @@ export function AppShell({ onSettings }: { onSettings: () => void }) {
 
   return (
     <div className="flex flex-col h-[100dvh]">
+      {showExpenses && restaurantId && (
+        <ExpensesScreen
+          restaurantId={restaurantId}
+          onClose={() => setShowExpenses(false)}
+        />
+      )}
+
       {showEmployeePanel && (
         <EmployeePanel
           onConfirm={(formattedText, workers) => {
@@ -172,9 +181,17 @@ export function AppShell({ onSettings }: { onSettings: () => void }) {
               </div>
             </div>
           </button>
-          <button onClick={onSettings} className="text-v-muted cursor-pointer hover:text-v-gold transition-colors duration-150 w-9 h-9 flex items-center justify-center">
-            <i className="ti ti-settings" style={{ fontSize: 20 }} />
-          </button>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setShowExpenses(true)}
+              className="text-v-muted cursor-pointer hover:text-v-gold transition-colors duration-150 w-9 h-9 flex items-center justify-center"
+            >
+              <i className="ti ti-receipt" style={{ fontSize: 20 }} />
+            </button>
+            <button onClick={onSettings} className="text-v-muted cursor-pointer hover:text-v-gold transition-colors duration-150 w-9 h-9 flex items-center justify-center">
+              <i className="ti ti-settings" style={{ fontSize: 20 }} />
+            </button>
+          </div>
         </div>
       </div>
 

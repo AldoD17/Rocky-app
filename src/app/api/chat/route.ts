@@ -88,7 +88,18 @@ export async function POST(req: NextRequest) {
       const { data: weekWorkers } = await supabase
         .from("shift_workers").select("hours_worked, employees(name, role, contract_type, hourly_rate_gross), shifts(shift_date)")
         .in("shift_id", (weekShifts || []).map((s: Record<string, unknown>) => s.id).filter(Boolean));
-      extraContext = `\n\nTURNI SETTIMANA (${monday}→${sunday}):\n${JSON.stringify(weekShifts || [], null, 2)}\n\nACQUISTI SETTIMANA:\n${JSON.stringify(weekPurchases || [], null, 2)}\n\nDIPENDANTI IN TURNO:\n${JSON.stringify(weekWorkers || [], null, 2)}\n\nSe ci sono acquisti con categoria 'altro' o fornitori sconosciuti, chiedine la classificazione. Segnala anomalie di spesa.`;
+      const { data: weekExpenses } = await supabase
+        .from("purchases")
+        .select("macro_category, category, label, amount, supplier_name, purchase_date")
+        .eq("restaurant_id", restaurant_id)
+        .eq("macro_category", "cogs")
+        .is("shift_id", null)
+        .gte("purchase_date", monday)
+        .lte("purchase_date", sunday);
+      const weekTotalRevenue = (weekShifts || []).reduce((s: number, sh: Record<string, unknown>) => s + ((sh.revenue as number) ?? 0), 0);
+      const weekCogsTotal = (weekExpenses || []).reduce((s: number, e: Record<string, unknown>) => s + ((e.amount as number) ?? 0), 0);
+      const weekFoodCostPct = weekTotalRevenue > 0 ? ((weekCogsTotal / weekTotalRevenue) * 100).toFixed(1) : null;
+      extraContext = `\n\nTURNI SETTIMANA (${monday}→${sunday}):\n${JSON.stringify(weekShifts || [], null, 2)}\n\nACQUISTI SETTIMANA (da turni):\n${JSON.stringify(weekPurchases || [], null, 2)}\n\nSPESE COGS MANUALI SETTIMANA:\n${JSON.stringify(weekExpenses || [], null, 2)}\n\nDIPENDANTI IN TURNO:\n${JSON.stringify(weekWorkers || [], null, 2)}\n\nFATTURATO SETTIMANA: €${weekTotalRevenue.toFixed(2)}\nCOGS SETTIMANA (spese manuali): €${weekCogsTotal.toFixed(2)}${weekFoodCostPct ? `\nFOOD COST %: ${weekFoodCostPct}% (benchmark sano: 28–35%, FIPE 2025)` : ""}\n\nSe ci sono acquisti con categoria 'altro' o fornitori sconosciuti, chiedine la classificazione. Segnala anomalie di spesa.`;
     }
 
     if (tab === "month") {
