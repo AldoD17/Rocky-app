@@ -31,7 +31,7 @@ interface ShiftWorkerInput {
   hours_worked: number;
 }
 
-function buildShiftAnalysisMessage(parsed: ParsedShift): string {
+function buildShiftAnalysisMessage(parsed: ParsedShift, locale: string = 'it'): string {
   const avgReceipt = parsed.revenue && parsed.receipts && parsed.receipts > 0
     ? (parsed.revenue / parsed.receipts).toFixed(2) : null;
   const foodCostPct = parsed.revenue && parsed.supplier_spend
@@ -57,7 +57,7 @@ function buildShiftAnalysisMessage(parsed: ParsedShift): string {
     revenuePerMh ? `Revenue/man-hour: €${revenuePerMh}` : "",
     parsed.missing_fields.length > 0 ? `Dati non forniti: ${parsed.missing_fields.join(", ")}. Menzionalo brevemente nella risposta.` : "",
     "",
-    "Rispondi SOLO con JSON valido nel formato specificato nel system prompt. Nessun testo fuori dal JSON.",
+    `Rispondi SOLO con JSON valido nel formato specificato nel system prompt. Nessun testo fuori dal JSON. Rispondi nella lingua: ${locale}`,
   ].filter(Boolean).join("\n");
 }
 
@@ -263,7 +263,7 @@ export async function POST(req: NextRequest) {
         ...history,
         { role: "user", content: user_message.trim() },
         { role: "assistant", content: "(turno registrato)" },
-        { role: "user", content: buildShiftAnalysisMessage({ ...parsed, supplier_spend: supplierSpend }) },
+        { role: "user", content: buildShiftAnalysisMessage({ ...parsed, supplier_spend: supplierSpend }, locale) },
       ],
     });
 
