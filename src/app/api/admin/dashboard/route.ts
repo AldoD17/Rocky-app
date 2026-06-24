@@ -9,12 +9,22 @@ async function safeNull<T>(fn: () => Promise<T>): Promise<T | null> {
   }
 }
 
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "https://claude.ai",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Authorization, Content-Type",
+};
+
+export async function OPTIONS() {
+  return new NextResponse(null, { status: 200, headers: corsHeaders });
+}
+
 export async function GET(req: NextRequest) {
   const adminSecret = process.env.ROCKY_ADMIN_SECRET;
   const authHeader = req.headers.get("authorization");
 
   if (!adminSecret || authHeader !== `Bearer ${adminSecret}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: corsHeaders });
   }
 
   const supabase = createServiceClient();
@@ -252,5 +262,5 @@ export async function GET(req: NextRequest) {
     });
   });
 
-  return NextResponse.json({ overview, growth, retention, engagement, users });
+  return NextResponse.json({ overview, growth, retention, engagement, users }, { headers: corsHeaders });
 }
