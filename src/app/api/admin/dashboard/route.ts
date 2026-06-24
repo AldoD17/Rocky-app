@@ -19,11 +19,15 @@ export async function OPTIONS() {
   return new NextResponse(null, { status: 200, headers: corsHeaders });
 }
 
-export async function GET(req: NextRequest) {
-  const adminSecret = process.env.ROCKY_ADMIN_SECRET;
-  const authHeader = req.headers.get("authorization");
+function isAuthorized(req: NextRequest): boolean {
+  const secret = process.env.ROCKY_ADMIN_SECRET;
+  if (!secret) return false;
+  if (req.headers.get("authorization") === `Bearer ${secret}`) return true;
+  return req.cookies.get("rocky_admin_session")?.value === secret;
+}
 
-  if (!adminSecret || authHeader !== `Bearer ${adminSecret}`) {
+export async function GET(req: NextRequest) {
+  if (!isAuthorized(req)) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401, headers: corsHeaders });
   }
 
