@@ -15,6 +15,7 @@ NEXT_PUBLIC_SUPABASE_URL=https://oamrocbawmvlgrauqyjn.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=<la tua anon key da Supabase → Settings → API>
 SUPABASE_SERVICE_ROLE_KEY=<la tua service_role key>
 ANTHROPIC_API_KEY=<la tua chiave API Anthropic>
+ROCKY_ADMIN_SECRET=<secret per il dashboard admin — GET /api/admin/dashboard>
 ```
 
 ```bash
