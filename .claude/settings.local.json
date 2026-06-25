@@ -27,7 +27,11 @@
       "mcp__supabase__get_project",
       "Bash(git add *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(openssl rand *)",
+      "Bash(lsof -ti:3000)",
+      "Bash(npm list *)",
+      "Bash(npm info *)"
     ]
   },
   "enableAllProjectMcpServers": true,

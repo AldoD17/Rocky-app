@@ -2,20 +2,27 @@
 
 import { useEffect, useState, useCallback } from 'react';
 import {
-  Chart as ChartJS,
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Tooltip,
-} from 'chart.js';
-import { Bar } from 'react-chartjs-2';
-
-ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip);
+  Card,
+  Metric,
+  Text,
+  Title,
+  BadgeDelta,
+  Badge,
+  BarChart,
+  Table,
+  TableHead,
+  TableRow,
+  TableHeaderCell,
+  TableBody,
+  TableCell,
+  Grid,
+  Col,
+  Divider,
+} from '@tremor/react';
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
 type DailyPoint = { date: string; count: number };
-type TabCount = { tab: string; count: number };
 
 type Overview = {
   total_users: number;
@@ -44,7 +51,7 @@ type Retention = {
 type Engagement = {
   avg_shifts_per_active_user_week: number;
   avg_messages_per_active_user_day: number;
-  tab_distribution: TabCount[];
+  tab_distribution: { tab: string; count: number }[];
   north_star: number;
 } | null;
 
@@ -82,68 +89,22 @@ function fmtDateTime(d: Date): string {
   return d.toLocaleString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-function planBadge(plan: string | null) {
-  const colors: Record<string, string> = {
-    pro: 'bg-purple-100 text-purple-800',
-    base: 'bg-blue-100 text-blue-800',
-    free: 'bg-gray-100 text-gray-600',
-  };
-  const cls = colors[plan ?? 'free'] ?? colors.free;
-  return <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${cls}`}>{plan ?? 'free'}</span>;
+function d7Color(pct: number): string {
+  if (pct >= 40) return 'text-emerald-600';
+  if (pct >= 20) return 'text-amber-600';
+  return 'text-red-600';
 }
 
-// ─── Sub-components ───────────────────────────────────────────────────────────
-
-function KpiCard({ label, value, sub }: { label: string; value: string | number; sub?: string }) {
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{label}</p>
-      <p className="text-2xl font-bold text-gray-900">{value}</p>
-      {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
-    </div>
-  );
+function northStarColor(val: number): string {
+  if (val >= 5) return 'text-emerald-600';
+  if (val >= 3) return 'text-amber-600';
+  return 'text-red-600';
 }
+
+// ─── Skeleton ────────────────────────────────────────────────────────────────
 
 function SkeletonLine({ w = 'w-full', h = 'h-4' }: { w?: string; h?: string }) {
   return <div className={`${w} ${h} bg-gray-200 rounded animate-pulse`} />;
-}
-
-function GrowthChart({
-  label,
-  points,
-  color,
-}: {
-  label: string;
-  points: DailyPoint[];
-  color: { bg: string; border: string };
-}) {
-  const labels = points.map((p) => p.date.slice(5));
-  const counts = points.map((p) => p.count);
-  return (
-    <div className="bg-white rounded-xl border border-gray-200 p-4">
-      <p className="text-sm font-semibold text-gray-700 mb-3">{label}</p>
-      <Bar
-        data={{
-          labels,
-          datasets: [
-            {
-              data: counts,
-              backgroundColor: color.bg,
-              borderColor: color.border,
-              borderWidth: 1,
-              borderRadius: 2,
-            },
-          ],
-        }}
-        options={{
-          responsive: true,
-          plugins: { legend: { display: false }, tooltip: { callbacks: { label: (ctx) => ` ${ctx.parsed.y}` } } },
-          scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { ticks: { maxTicksLimit: 10 } } },
-        }}
-        height={80}
-      />
-    </div>
-  );
 }
 
 // ─── Main component ───────────────────────────────────────────────────────────
@@ -180,7 +141,6 @@ export default function AdminPage() {
       setLastRefresh(new Date());
       setLoadingData(false);
 
-      // Fetch briefing after data is ready
       try {
         const br = await fetch('/api/admin/briefing', {
           method: 'POST',
@@ -218,7 +178,7 @@ export default function AdminPage() {
         setUserBriefing(text);
       }
     } catch {
-      setUserBriefing('Errore nel caricamento dell\'analisi.');
+      setUserBriefing("Errore nel caricamento dell'analisi.");
     } finally {
       setLoadingUserBriefing(false);
     }
@@ -228,22 +188,38 @@ export default function AdminPage() {
     ? [...data.users].sort((a, b) => (b.last_active ?? '').localeCompare(a.last_active ?? ''))
     : [];
 
+  // Chart data helpers
+  const shiftsChartData = (data?.growth?.daily_shifts ?? []).map((p) => ({
+    date: p.date.slice(5),
+    'Turni': p.count,
+  }));
+  const messagesChartData = (data?.growth?.daily_messages ?? []).map((p) => ({
+    date: p.date.slice(5),
+    'Messaggi': p.count,
+  }));
+
+  // Delta helpers (compare last 30 vs prior 30 for shifts)
+  const shiftsLast30 = data?.growth?.daily_shifts?.reduce((s, p) => s + p.count, 0) ?? 0;
+  const messagesLast30 = data?.growth?.daily_messages?.reduce((s, p) => s + p.count, 0) ?? 0;
+
+  const d7Ret = data?.retention?.d7_retention ?? 0;
+  const northStar = data?.engagement?.north_star ?? 0;
+
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 py-6 space-y-6">
-
-        {/* ── Header ── */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      {/* ── Header ── */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4">
+        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-2xl font-bold text-gray-900 tracking-tight">Rocky</span>
-            <span className="text-xs font-semibold bg-gray-900 text-white rounded-full px-2 py-0.5">ADMIN</span>
+            <Badge color="gray" size="xs">ADMIN</Badge>
           </div>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-500">
+            <Text className="text-gray-500">
               {loadingData ? 'Caricamento…' : `Aggiornato: ${fmtDateTime(lastRefresh)}`}
-            </span>
+            </Text>
             <button
               onClick={fetchAll}
               disabled={loadingData}
@@ -253,7 +229,11 @@ export default function AdminPage() {
             </button>
           </div>
         </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-6">
+
+        {/* ── Error ── */}
         {fetchError && (
           <div className="bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm">
             Errore nel caricamento dati: {fetchError}
@@ -261,186 +241,257 @@ export default function AdminPage() {
         )}
 
         {/* ── Briefing ── */}
-        <div className="bg-amber-50 border border-amber-200 rounded-xl p-5">
-          <p className="text-sm font-semibold text-amber-900 mb-3">Briefing del giorno</p>
+        <Card className="border-l-4 border-l-amber-400">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-lg">✨</span>
+            <Title className="text-amber-900">Briefing del giorno</Title>
+          </div>
           {loadingBriefing ? (
             <div className="space-y-2">
               <SkeletonLine h="h-4" w="w-full" />
               <SkeletonLine h="h-4" w="w-5/6" />
               <SkeletonLine h="h-4" w="w-4/6" />
-              <SkeletonLine h="h-4" w="w-full" />
-              <SkeletonLine h="h-4" w="w-3/4" />
             </div>
           ) : briefing ? (
-            <p className="text-sm text-amber-900 leading-relaxed whitespace-pre-wrap">{briefing}</p>
+            <Text className="text-amber-900 leading-relaxed whitespace-pre-wrap">{briefing}</Text>
           ) : (
-            <p className="text-sm text-amber-700 italic">Briefing non disponibile.</p>
+            <Text className="text-amber-700 italic">Briefing non disponibile.</Text>
           )}
-        </div>
+        </Card>
 
-        {/* ── KPI Overview ── */}
+        {/* ── KPI Row ── */}
         <div>
-          <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Overview</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-            <KpiCard label="Utenti totali" value={data?.overview?.total_users ?? '—'} />
-            <KpiCard label="Ristoranti" value={data?.overview?.total_restaurants ?? '—'} />
-            <KpiCard label="Turni totali" value={data?.overview?.total_shifts ?? '—'} />
-            <KpiCard label="Conversazioni" value={data?.overview?.total_conversations ?? '—'} />
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-3">
-            <KpiCard label="D1 Retention" value={data?.retention != null ? `${data.retention.d1_retention}%` : '—'} sub="dopo giorno 1" />
-            <KpiCard label="D7 Retention" value={data?.retention != null ? `${data.retention.d7_retention}%` : '—'} sub="dopo giorno 7" />
-            <KpiCard label="Attivi 7gg" value={data?.retention?.active_last_7_days ?? '—'} sub="ristoranti unici" />
-            <KpiCard
-              label="North Star"
-              value={data?.engagement != null ? data.engagement.north_star.toFixed(1) : '—'}
-              sub="turni/utente/sett"
-            />
-          </div>
+          <Title className="mb-3 text-gray-500 uppercase text-xs tracking-wide font-semibold">Overview</Title>
+          <Grid numItemsSm={2} numItemsLg={4} className="gap-4">
+            <Card>
+              <Text>Utenti totali</Text>
+              <div className="flex items-end justify-between mt-1">
+                <Metric>{loadingData ? '—' : (data?.overview?.total_users ?? '—')}</Metric>
+                {!loadingData && data?.overview && (
+                  <BadgeDelta deltaType="increase" size="xs">questo mese</BadgeDelta>
+                )}
+              </div>
+            </Card>
+
+            <Card>
+              <Text>Turni registrati</Text>
+              <div className="flex items-end justify-between mt-1">
+                <Metric>{loadingData ? '—' : (data?.overview?.total_shifts ?? '—')}</Metric>
+                {!loadingData && (
+                  <BadgeDelta deltaType={shiftsLast30 > 0 ? 'increase' : 'unchanged'} size="xs">
+                    {shiftsLast30} 30gg
+                  </BadgeDelta>
+                )}
+              </div>
+            </Card>
+
+            <Card>
+              <Text>D7 Retention</Text>
+              <div className="flex items-end justify-between mt-1">
+                <Metric className={loadingData ? '' : d7Color(d7Ret)}>
+                  {loadingData ? '—' : `${d7Ret}%`}
+                </Metric>
+                {!loadingData && (
+                  <BadgeDelta
+                    deltaType={d7Ret >= 40 ? 'increase' : d7Ret >= 20 ? 'unchanged' : 'decrease'}
+                    size="xs"
+                  >
+                    dopo 7gg
+                  </BadgeDelta>
+                )}
+              </div>
+            </Card>
+
+            <Card>
+              <Text>North Star</Text>
+              <div className="flex items-end justify-between mt-1">
+                <Metric className={loadingData ? '' : northStarColor(northStar)}>
+                  {loadingData ? '—' : northStar.toFixed(1)}
+                </Metric>
+                {!loadingData && (
+                  <BadgeDelta
+                    deltaType={northStar >= 5 ? 'increase' : northStar >= 3 ? 'unchanged' : 'decrease'}
+                    size="xs"
+                  >
+                    turni/utente/sett
+                  </BadgeDelta>
+                )}
+              </div>
+            </Card>
+          </Grid>
         </div>
 
-        {/* ── Growth Charts ── */}
+        {/* ── Charts Row ── */}
         {mounted && data?.growth && (
-          <div>
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Crescita — ultimi 30 giorni</h2>
-            <div className="space-y-3">
-              <GrowthChart
-                label="Nuovi utenti"
-                points={data.growth.daily_signups}
-                color={{ bg: 'rgba(59,130,246,0.5)', border: 'rgb(59,130,246)' }}
+          <Grid numItemsSm={1} numItemsLg={2} className="gap-4">
+            <Card>
+              <Title>Turni — ultimi 30 giorni</Title>
+              <Text>{shiftsLast30} turni totali nel periodo</Text>
+              <BarChart
+                className="mt-4 h-40"
+                data={shiftsChartData}
+                index="date"
+                categories={['Turni']}
+                colors={['teal']}
+                showLegend={false}
+                showGridLines={false}
+                yAxisWidth={30}
               />
-              <GrowthChart
-                label="Turni registrati"
-                points={data.growth.daily_shifts}
-                color={{ bg: 'rgba(34,197,94,0.5)', border: 'rgb(34,197,94)' }}
+            </Card>
+            <Card>
+              <Title>Messaggi — ultimi 30 giorni</Title>
+              <Text>{messagesLast30} messaggi totali nel periodo</Text>
+              <BarChart
+                className="mt-4 h-40"
+                data={messagesChartData}
+                index="date"
+                categories={['Messaggi']}
+                colors={['violet']}
+                showLegend={false}
+                showGridLines={false}
+                yAxisWidth={30}
               />
-              <GrowthChart
-                label="Messaggi inviati"
-                points={data.growth.daily_messages}
-                color={{ bg: 'rgba(168,85,247,0.5)', border: 'rgb(168,85,247)' }}
-              />
-            </div>
-          </div>
+            </Card>
+          </Grid>
         )}
+
+        {/* ── Retention Row ── */}
+        <Grid numItemsSm={3} numItemsLg={3} className="gap-4">
+          <Card>
+            <Text>D1 Retention</Text>
+            <Metric className="mt-1">{loadingData ? '—' : `${data?.retention?.d1_retention ?? 0}%`}</Metric>
+            <Text className="mt-1 text-gray-400">dopo giorno 1</Text>
+          </Card>
+          <Card>
+            <Text>Attivi ultimi 7 giorni</Text>
+            <Metric className="mt-1">{loadingData ? '—' : (data?.retention?.active_last_7_days ?? '—')}</Metric>
+            <Text className="mt-1 text-gray-400">ristoranti unici</Text>
+          </Card>
+          <Card>
+            <Text>Churned</Text>
+            <Metric
+              className={`mt-1 ${!loadingData && (data?.retention?.churned ?? 0) > 0 ? 'text-red-600' : ''}`}
+            >
+              {loadingData ? '—' : (data?.retention?.churned ?? '—')}
+            </Metric>
+            <Text className="mt-1 text-gray-400">inattivi da 14gg+</Text>
+          </Card>
+        </Grid>
+
+        <Divider />
 
         {/* ── Users Table ── */}
         {data?.users && (
           <div>
-            <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">
-              Utenti ({sortedUsers.length})
-            </h2>
-            <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-gray-100 bg-gray-50">
-                      <th className="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Ristorante</th>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Email</th>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Piano</th>
-                      <th className="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Stato</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Turni</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Msg</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Turni 7gg</th>
-                      <th className="text-right px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Ultima attività</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedUsers.map((u) => {
-                      const isSelected = selectedUser?.restaurant_id === u.restaurant_id;
-                      return (
-                        <>
-                          <tr
-                            key={u.restaurant_id}
-                            onClick={() => {
-                              if (isSelected) {
-                                setSelectedUser(null);
-                                setUserBriefing('');
-                              } else {
-                                setSelectedUser(u);
-                                setUserBriefing('');
-                              }
-                            }}
-                            className={[
-                              'border-b border-gray-100 cursor-pointer transition-colors',
-                              u.is_churned ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50',
-                              isSelected ? 'ring-2 ring-inset ring-gray-900' : '',
-                            ].join(' ')}
-                          >
-                            <td className="px-4 py-3 font-medium text-gray-900 whitespace-nowrap">
-                              {u.restaurant_name}
-                            </td>
-                            <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{u.user_email ?? '—'}</td>
-                            <td className="px-4 py-3">{planBadge(u.plan)}</td>
-                            <td className="px-4 py-3">
-                              <span
-                                className={`text-xs font-medium px-2 py-0.5 rounded-full ${
-                                  u.is_churned
-                                    ? 'bg-red-100 text-red-700'
-                                    : 'bg-green-100 text-green-700'
-                                }`}
-                              >
-                                {u.is_churned ? 'Inattivo' : 'Attivo'}
-                              </span>
-                            </td>
-                            <td className="px-4 py-3 text-right text-gray-700">{u.total_shifts}</td>
-                            <td className="px-4 py-3 text-right text-gray-700">{u.total_messages}</td>
-                            <td className="px-4 py-3 text-right text-gray-700">{u.shifts_last_7_days}</td>
-                            <td className="px-4 py-3 text-right text-gray-500 whitespace-nowrap">
-                              {fmtDate(u.last_active)}
-                            </td>
-                          </tr>
+            <Title className="mb-3">Utenti ({sortedUsers.length})</Title>
+            <Card className="p-0 overflow-hidden">
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableHeaderCell>Ristorante</TableHeaderCell>
+                    <TableHeaderCell>Email</TableHeaderCell>
+                    <TableHeaderCell>Piano</TableHeaderCell>
+                    <TableHeaderCell>Stato</TableHeaderCell>
+                    <TableHeaderCell className="text-right">Turni totali</TableHeaderCell>
+                    <TableHeaderCell className="text-right">7gg</TableHeaderCell>
+                    <TableHeaderCell className="text-right">Ultima attività</TableHeaderCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {sortedUsers.map((u) => {
+                    const isSelected = selectedUser?.restaurant_id === u.restaurant_id;
+                    return (
+                      <>
+                        <TableRow
+                          key={u.restaurant_id}
+                          onClick={() => {
+                            if (isSelected) {
+                              setSelectedUser(null);
+                              setUserBriefing('');
+                            } else {
+                              setSelectedUser(u);
+                              setUserBriefing('');
+                            }
+                          }}
+                          className={[
+                            'cursor-pointer transition-colors',
+                            u.is_churned ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50',
+                            isSelected ? 'ring-2 ring-inset ring-gray-900' : '',
+                          ].join(' ')}
+                        >
+                          <TableCell className="font-medium text-gray-900 whitespace-nowrap">
+                            {u.restaurant_name}
+                          </TableCell>
+                          <TableCell className="text-gray-600 whitespace-nowrap">
+                            {u.user_email ?? '—'}
+                          </TableCell>
+                          <TableCell>
+                            <Badge
+                              color={u.plan === 'pro' ? 'amber' : u.plan === 'base' ? 'blue' : 'gray'}
+                              size="xs"
+                            >
+                              {u.plan ?? 'free'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge color={u.is_churned ? 'red' : 'green'} size="xs">
+                              {u.is_churned ? 'Inattivo' : 'Attivo'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell className="text-right">{u.total_shifts}</TableCell>
+                          <TableCell className="text-right">{u.shifts_last_7_days}</TableCell>
+                          <TableCell className="text-right text-gray-500 whitespace-nowrap">
+                            {fmtDate(u.last_active)}
+                          </TableCell>
+                        </TableRow>
 
-                          {/* Inline detail panel */}
-                          {isSelected && (
-                            <tr key={`${u.restaurant_id}-detail`} className="bg-gray-50">
-                              <td colSpan={8} className="px-4 py-4">
-                                <div className="flex flex-col sm:flex-row gap-4">
-                                  {/* Stats */}
-                                  <div className="flex-1 grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                    <div className="bg-white rounded-lg border border-gray-200 p-3">
-                                      <p className="text-xs text-gray-500">Iscritto</p>
-                                      <p className="text-sm font-semibold text-gray-900">{fmtDate(u.created_at)}</p>
+                        {/* Inline detail panel */}
+                        {isSelected && (
+                          <TableRow key={`${u.restaurant_id}-detail`} className="bg-gray-50">
+                            <TableCell colSpan={7} className="px-4 py-4">
+                              <div className="flex flex-col sm:flex-row gap-4">
+                                <Grid numItemsSm={2} numItemsLg={4} className="gap-2 flex-1">
+                                  <Card className="p-3">
+                                    <Text className="text-xs text-gray-500">Iscritto</Text>
+                                    <Text className="font-semibold text-gray-900">{fmtDate(u.created_at)}</Text>
+                                  </Card>
+                                  <Card className="p-3">
+                                    <Text className="text-xs text-gray-500">Onboarding</Text>
+                                    <Text className="font-semibold text-gray-900">Step {u.onboarding_step}</Text>
+                                  </Card>
+                                  <Card className="p-3">
+                                    <Text className="text-xs text-gray-500">Msg 7gg</Text>
+                                    <Text className="font-semibold text-gray-900">{u.messages_last_7_days}</Text>
+                                  </Card>
+                                  <Card className="p-3">
+                                    <Text className="text-xs text-gray-500">Ultima attività</Text>
+                                    <Text className="font-semibold text-gray-900">{fmtDate(u.last_active)}</Text>
+                                  </Card>
+                                </Grid>
+                                <div className="sm:w-56 flex flex-col gap-2">
+                                  <button
+                                    onClick={(e) => { e.stopPropagation(); analyzeUser(u); }}
+                                    disabled={loadingUserBriefing}
+                                    className="w-full px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
+                                  >
+                                    {loadingUserBriefing ? 'Analisi…' : 'Analizza questo utente'}
+                                  </button>
+                                  {userBriefing && (
+                                    <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900 leading-relaxed whitespace-pre-wrap">
+                                      {userBriefing}
                                     </div>
-                                    <div className="bg-white rounded-lg border border-gray-200 p-3">
-                                      <p className="text-xs text-gray-500">Onboarding</p>
-                                      <p className="text-sm font-semibold text-gray-900">Step {u.onboarding_step}</p>
-                                    </div>
-                                    <div className="bg-white rounded-lg border border-gray-200 p-3">
-                                      <p className="text-xs text-gray-500">Msg 7gg</p>
-                                      <p className="text-sm font-semibold text-gray-900">{u.messages_last_7_days}</p>
-                                    </div>
-                                    <div className="bg-white rounded-lg border border-gray-200 p-3">
-                                      <p className="text-xs text-gray-500">Ultima attività</p>
-                                      <p className="text-sm font-semibold text-gray-900">{fmtDate(u.last_active)}</p>
-                                    </div>
-                                  </div>
-
-                                  {/* Analyse button + result */}
-                                  <div className="sm:w-56 flex flex-col gap-2">
-                                    <button
-                                      onClick={(e) => { e.stopPropagation(); analyzeUser(u); }}
-                                      disabled={loadingUserBriefing}
-                                      className="w-full px-3 py-2 bg-gray-900 text-white text-xs font-medium rounded-lg hover:bg-gray-800 disabled:opacity-50 transition-colors"
-                                    >
-                                      {loadingUserBriefing ? 'Analisi…' : 'Analizza questo utente'}
-                                    </button>
-                                    {userBriefing && (
-                                      <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-900 leading-relaxed whitespace-pre-wrap">
-                                        {userBriefing}
-                                      </div>
-                                    )}
-                                  </div>
+                                  )}
                                 </div>
-                              </td>
-                            </tr>
-                          )}
-                        </>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </>
+                    );
+                  })}
+                </TableBody>
+              </Table>
+            </Card>
           </div>
         )}
 

@@ -41,8 +41,8 @@ export async function POST(req: NextRequest) {
 
     const userPrompt =
       focus === 'single_user'
-        ? `Analizza questo ristoratore e dimmi: sta usando Rocky bene? Cosa rischia? Cosa dovrei fare per aumentare il suo engagement? Dati: ${JSON.stringify(data)}`
-        : `Oggi è ${today}. Analizza questi dati di Rocky e forniscimi:\n1. STATO GENERALE (2 righe): come stiamo andando oggi vs ieri\n2. UTENTI A RISCHIO CHURN: chi non usa Rocky da più di 7 giorni e cosa fare\n3. TREND POSITIVI: cosa sta funzionando bene\n4. PRIORITÀ OGGI: 2-3 azioni concrete che devo fare oggi\n5. METRICA DA MONITORARE: il numero più importante da tenere d'occhio questa settimana\n\nDati: ${JSON.stringify(data)}`;
+        ? `Analizza questo ristoratore in massimo 3 righe: sta usando Rocky bene? Cosa rischia? Cosa fare per aumentare il suo engagement? Dati: ${JSON.stringify(data)}`
+        : `Oggi è ${today}. In MASSIMO 3 RIGHE, niente liste né titoli: stato generale vs ieri, chi rischia churn, e la priorità più urgente per oggi. Diretto e azionabile. Dati: ${JSON.stringify(data)}`;
 
     const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
     const response = await anthropic.messages.create({
