@@ -66,6 +66,9 @@ export function Dashboard() {
   const [currExpenses, setCurrExpenses] = useState(0);
   const [prevExpenses, setPrevExpenses] = useState(0);
   const [dailyData, setDailyData] = useState<{ day: number; value: number }[]>([]);
+  const [scontrinoMedio, setScontrinoMedio] = useState(0);
+  const [foodCostPct, setFoodCostPct] = useState(0);
+  const [manHoursProd, setManHoursProd] = useState(0);
 
   const firstName =
     user?.user_metadata?.full_name?.split(" ")[0] ||
@@ -85,21 +88,23 @@ export function Dashboard() {
       const [currShiftsRes, prevShiftsRes, currPurchasesRes, prevPurchasesRes, fcRes] =
         await Promise.all([
           supabase.from("shifts")
-            .select("shift_date, revenue, workers_count, service_hours")
+            .select("shift_date, revenue, workers_count, service_hours, receipts, supplier_spend")
             .eq("restaurant_id", restaurant.id)
             .gte("shift_date", curr.start).lte("shift_date", curr.end),
           supabase.from("shifts")
-            .select("revenue, workers_count, service_hours")
+            .select("revenue, workers_count, service_hours, supplier_spend")
             .eq("restaurant_id", restaurant.id)
             .gte("shift_date", prev.start).lte("shift_date", prev.end),
           supabase.from("purchases")
             .select("amount")
             .eq("restaurant_id", restaurant.id)
-            .gte("purchase_date", curr.start).lte("purchase_date", curr.end),
+            .gte("purchase_date", curr.start).lte("purchase_date", curr.end)
+            .is("shift_id", null),
           supabase.from("purchases")
             .select("amount")
             .eq("restaurant_id", restaurant.id)
-            .gte("purchase_date", prev.start).lte("purchase_date", prev.end),
+            .gte("purchase_date", prev.start).lte("purchase_date", prev.end)
+            .is("shift_id", null),
           supabase.from("fixed_costs")
             .select("amount, frequency")
             .eq("restaurant_id", restaurant.id).eq("active", true),
@@ -108,6 +113,8 @@ export function Dashboard() {
       const cShifts = currShiftsRes.data || [];
       const cRev = cShifts.reduce((s, r) => s + (r.revenue ?? 0), 0);
       const cMh = cShifts.reduce((s, r) => s + (r.workers_count ?? 0) * (r.service_hours ?? 0), 0);
+      const cCogs = cShifts.reduce((s, r) => s + (r.supplier_spend ?? 0), 0);
+      const cReceipts = cShifts.reduce((s, r) => s + (r.receipts ?? 0), 0);
       setCurrRevenue(cRev);
 
       const byDay: Record<number, number> = {};
@@ -125,6 +132,7 @@ export function Dashboard() {
       const pShifts = prevShiftsRes.data || [];
       const pRev = pShifts.reduce((s, r) => s + (r.revenue ?? 0), 0);
       const pMh = pShifts.reduce((s, r) => s + (r.workers_count ?? 0) * (r.service_hours ?? 0), 0);
+      const pCogs = pShifts.reduce((s, r) => s + (r.supplier_spend ?? 0), 0);
       setPrevRevenue(pRev);
 
       const fixedMonthly = (fcRes.data || []).reduce(
@@ -133,10 +141,14 @@ export function Dashboard() {
       );
 
       const cPurchases = (currPurchasesRes.data || []).reduce((s, r) => s + (r.amount ?? 0), 0);
-      setCurrExpenses(cPurchases + cMh * 20 * 1.55 + fixedMonthly);
+      setCurrExpenses(cCogs + cPurchases + cMh * 20 * 1.55 + fixedMonthly);
 
       const pPurchases = (prevPurchasesRes.data || []).reduce((s, r) => s + (r.amount ?? 0), 0);
-      setPrevExpenses(pPurchases + pMh * 20 * 1.55 + fixedMonthly);
+      setPrevExpenses(pCogs + pPurchases + pMh * 20 * 1.55 + fixedMonthly);
+
+      setScontrinoMedio(cReceipts > 0 ? cRev / cReceipts : 0);
+      setFoodCostPct(cRev > 0 ? ((cCogs + cPurchases) / cRev) * 100 : 0);
+      setManHoursProd(cMh > 0 ? cRev / cMh : 0);
 
       setLoading(false);
     })();
@@ -221,6 +233,24 @@ export function Dashboard() {
           {prevExpenses > 0 && (
             <div className="text-[11px] font-body text-v-muted mt-2">vs {fmt(prevExpenses)}</div>
           )}
+        </div>
+      </div>
+
+      {/* KPI mini-cards */}
+      <div className="grid grid-cols-3 gap-2 mt-3">
+        <div className="bg-v-panel2 border border-v-line rounded-2xl p-3">
+          <div className="text-[10px] font-body text-v-muted uppercase tracking-[0.4px] mb-2">Scontrino medio</div>
+          <div className="font-display text-v-cream text-[14px] leading-none">{fmt(scontrinoMedio)}</div>
+        </div>
+        <div className="bg-v-panel2 border border-v-line rounded-2xl p-3">
+          <div className="text-[10px] font-body text-v-muted uppercase tracking-[0.4px] mb-2">Food cost %</div>
+          <div className={`font-display text-[14px] leading-none ${foodCostPct < 35 ? "text-v-green" : foodCostPct > 40 ? "text-v-red" : "text-v-amber"}`}>
+            {foodCostPct.toFixed(1)}%
+          </div>
+        </div>
+        <div className="bg-v-panel2 border border-v-line rounded-2xl p-3">
+          <div className="text-[10px] font-body text-v-muted uppercase tracking-[0.4px] mb-2">Produttività</div>
+          <div className="font-display text-v-cream text-[14px] leading-none">{fmt(manHoursProd)}/h</div>
         </div>
       </div>
 

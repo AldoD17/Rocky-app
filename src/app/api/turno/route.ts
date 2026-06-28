@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import Anthropic from "@anthropic-ai/sdk";
 import { createServerClient } from "@supabase/ssr";
 import { createServiceClient } from "@/lib/supabase-server";
-import { TURNO_EXTRACTION_PROMPT, buildSystemPrompt } from "@/lib/prompts";
+import { TURNO_EXTRACTION_PROMPT, buildSystemPrompt, buildMemoryUpdatePrompt } from "@/lib/prompts";
 
 const anthropic = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY! });
 
@@ -103,6 +103,9 @@ async function savePurchases(
       supplier_name: p.supplier_name.trim(),
       amount: p.amount ?? 0,
       category: resolvedCategory,
+      macro_category: (resolvedCategory === "alimenti" || resolvedCategory === "bevande")
+        ? "cogs"
+        : "variabili",
       purchase_date: shift_date,
     });
   }
@@ -159,18 +162,25 @@ export async function POST(req: NextRequest) {
     // 2. Messaggio non-turno → risposta chat generica
     if (!parsed.is_shift_data || !parsed.revenue) {
       const { data: restaurantData } = await supabase.rpc("get_dati_ristorante", { p_restaurant_id: restaurant_id });
+      const { data: restaurantMeta } = await supabase
+        .from("restaurants")
+        .select("ai_memory")
+        .eq("id", restaurant_id)
+        .single();
+      const aiMemory = restaurantMeta?.ai_memory ?? null;
       const { data: conversations } = await supabase
         .from("conversations").select("role, content")
         .eq("restaurant_id", restaurant_id)
         .order("created_at", { ascending: false }).limit(10);
       const history = (conversations || []).reverse()
         .filter((c) => c.role && c.content)
+        .filter((c) => !(c.role === "assistant" && c.content.trim().startsWith("{")))
         .map((c) => ({ role: c.role as "user" | "assistant", content: c.content }));
 
       const chatRes = await anthropic.messages.create({
         model: "claude-sonnet-4-6",
         max_tokens: 1024,
-        system: buildSystemPrompt(restaurantData || {}, locale),
+        system: buildSystemPrompt(restaurantData || {}, locale, aiMemory),
         messages: [...history, { role: "user", content: user_message.trim() }],
       });
       const assistantText = chatRes.content.filter((b) => b.type === "text")
@@ -253,6 +263,7 @@ export async function POST(req: NextRequest) {
       .order("created_at", { ascending: false }).limit(8);
     const history = (conversations || []).reverse()
       .filter((c) => c.role && c.content)
+      .filter((c) => !(c.role === "assistant" && c.content.trim().startsWith("{")))
       .map((c) => ({ role: c.role as "user" | "assistant", content: c.content }));
 
     const analysisRes = await anthropic.messages.create({
@@ -281,6 +292,43 @@ export async function POST(req: NextRequest) {
 
     const { error: insertTurnoAssistantError } = await supabase.from("conversations").insert({ restaurant_id, role: "assistant", content: assistantText, shift_id: shiftId, tokens_used: analysisRes.usage?.output_tokens || null, tab: "oggi" });
     if (insertTurnoAssistantError) console.error("TURNO CONVERSATION ASSISTANT ERROR:", JSON.stringify(insertTurnoAssistantError));
+
+    // 10. Aggiorna memoria AI
+    try {
+      const { data: currentRestaurant } = await supabase
+        .from("restaurants")
+        .select("ai_memory")
+        .eq("id", restaurant_id)
+        .single();
+
+      const memoryRes = await anthropic.messages.create({
+        model: "claude-sonnet-4-6",
+        max_tokens: 512,
+        system: "Rispondi SOLO con JSON valido. Nessun testo prima o dopo.",
+        messages: [{
+          role: "user",
+          content: buildMemoryUpdatePrompt(
+            currentRestaurant?.ai_memory ?? null,
+            { ...parsed, supplier_spend: supplierSpend },
+            restaurantData || {}
+          )
+        }]
+      });
+
+      const memoryText = memoryRes.content
+        .filter(b => b.type === "text")
+        .map(b => b.type === "text" ? b.text : "")
+        .join("").trim()
+        .replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```\s*$/i, "").trim();
+
+      const newMemory = JSON.parse(memoryText);
+      await supabase
+        .from("restaurants")
+        .update({ ai_memory: newMemory })
+        .eq("id", restaurant_id);
+    } catch (memErr) {
+      console.error("Memory update error (non-blocking):", memErr);
+    }
 
     let structured: Record<string, unknown> | null = null;
     try {

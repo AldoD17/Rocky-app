@@ -38,6 +38,7 @@ export function MonthSummary() {
         supabase.from("purchases")
           .select("amount, category")
           .eq("restaurant_id", restaurant.id)
+          .is("shift_id", null)
           .gte("purchase_date", start).lte("purchase_date", end),
         supabase.from("fixed_costs")
           .select("amount, frequency")
@@ -91,7 +92,8 @@ export function MonthSummary() {
     </div>
   );
 
-  const totalCogs = hasPurchases ? cogsAlim + cogsBev + cogsCons + cogsAltro : cogsFromShifts;
+  const manualCogs = cogsAlim + cogsBev + cogsCons + cogsAltro;
+  const totalCogs = cogsFromShifts + (hasPurchases ? manualCogs : 0);
   const ebitda = revenue - totalCogs - laborEstimate - fixedTotal;
   const ebitdaPct = revenue > 0 ? (ebitda / revenue) * 100 : 0;
 

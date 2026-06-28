@@ -1,4 +1,8 @@
-export function buildSystemPrompt(restaurantData: Record<string, unknown>, language = 'it'): string {
+export function buildSystemPrompt(
+  restaurantData: Record<string, unknown>,
+  language = 'it',
+  aiMemory: Record<string, unknown> | null = null
+): string {
   return `# SYSTEM PROMPT — Agente "Rocky"
 ### Coach di controllo di gestione per ristoratori indipendenti
 
@@ -47,6 +51,12 @@ Chiedi un dato alla volta, legalo sempre a un beneficio concreto.
 ${JSON.stringify(restaurantData, null, 2)}
 \`\`\`
 
+${aiMemory ? `## 7b. MEMORIA OPERATIVA (aggiornata automaticamente)
+Queste sono osservazioni accumulate nel tempo su questo locale. Usale per dare risposte più contestualizzate.
+\`\`\`json
+${JSON.stringify(aiMemory, null, 2)}
+\`\`\`
+` : ''}
 ## 8. KPI E BENCHMARK CERTIFICATI
 Database: "Database KPI Ristorazione Europea v1.0" (fonti: FIPE 2025, NRA 2025, VantaInsights 2024, CCNL FIPE 2024, Ministero Lavoro 2025)
 
@@ -245,6 +255,42 @@ Regole:
 
 Schema output:
 {"is_shift_data":true,"shift_date":"YYYY-MM-DD","service_type":"cena","revenue":1400.00,"receipts":38,"service_hours":4.0,"workers_count":4,"supplier_spend":150.00,"confidence":"high","missing_fields":[],"purchases":[{"supplier_name":"Metro","amount":100,"category":"alimenti"},{"supplier_name":"Fornitore Vini","amount":50,"category":"bevande"}]}`;
+
+export function buildMemoryUpdatePrompt(
+  currentMemory: Record<string, unknown> | null,
+  parsedShift: Record<string, unknown>,
+  restaurantData: Record<string, unknown>
+): string {
+  return `Sei il sistema di memoria di Rocky. Analizza il turno appena registrato e aggiorna la memoria del ristorante.
+
+MEMORIA ATTUALE:
+${JSON.stringify(currentMemory, null, 2)}
+
+TURNO APPENA REGISTRATO:
+${JSON.stringify(parsedShift, null, 2)}
+
+PROFILO RISTORANTE:
+${JSON.stringify(restaurantData, null, 2)}
+
+Rispondi SOLO con un oggetto JSON valido con questa struttura:
+{
+  "last_updated": "YYYY-MM-DD",
+  "avg_food_cost_pct": numero o null,
+  "avg_revenue_per_shift": numero o null,
+  "weak_areas": ["array di stringhe, max 3, problemi ricorrenti"],
+  "strong_areas": ["array di stringhe, max 2, punti di forza"],
+  "last_5_shifts_trend": "stringa breve sul trend recente",
+  "open_questions": ["dati strutturali mai dichiarati, max 3"],
+  "notes": "osservazione chiave sul locale, max 1 frase"
+}
+
+Regole:
+- Aggiorna avg_food_cost_pct e avg_revenue_per_shift come media mobile (peso 0.3 nuovo turno, 0.7 memoria esistente)
+- Se la memoria è null, inizializza con i dati del turno corrente
+- weak_areas e strong_areas devono essere osservazioni operative concrete, non generiche
+- open_questions: solo dati che mancano e che cambierebbero l'analisi (es: "affitto mai dichiarato")
+- Nessun testo fuori dal JSON`;
+}
 
 export function buildLearnSystemPrompt(language = 'it'): string {
   return `Sei Rocky, un coach di gestione per ristoratori italiani. In questa modalità il tuo compito è spiegare termini e concetti di gestione in modo chiaro, pratico e concreto.

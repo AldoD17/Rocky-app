@@ -91,13 +91,13 @@ export const ChatView = forwardRef<ChatViewHandle, ChatViewProps>(function ChatV
       <div ref={scrollRef} className="flex-1 overflow-y-auto px-4 py-4">
         {headerSlot}
         {messages.map((m, i) =>
-          m.role === "bot" && m.structured ? (
+          m.role === "bot" && m.structured && m.structured.semaforo ? (
             <div key={i} className="mb-2">
               <RockyCard data={m.structured as unknown as Parameters<typeof RockyCard>[0]["data"]} />
             </div>
           ) : (
             <Bubble key={i} from={m.role === "bot" ? "bot" : "user"}>
-              {m.content}
+              <span dangerouslySetInnerHTML={{ __html: m.content }} />
             </Bubble>
           )
         )}

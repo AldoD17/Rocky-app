@@ -64,6 +64,12 @@ export async function POST(req: NextRequest) {
       console.error("RPC error:", rpcError);
       return NextResponse.json({ status: "error", message: "Errore nel recupero dati ristorante" }, { status: 500 });
     }
+    const { data: restaurantMeta } = await supabase
+      .from("restaurants")
+      .select("ai_memory")
+      .eq("id", restaurant_id)
+      .single();
+    const aiMemory = restaurantMeta?.ai_memory ?? null;
 
     // 2. Cronologia conversazioni
     const { data: conversations } = await supabase
@@ -72,6 +78,7 @@ export async function POST(req: NextRequest) {
       .order("created_at", { ascending: false }).limit(10);
     const history = (conversations || []).reverse()
       .filter((c) => c.role && c.content)
+      .filter((c) => !(c.role === "assistant" && c.content.trim().startsWith("{")))
       .map((c) => ({ role: c.role as "user" | "assistant", content: c.content }));
 
     // 3. Contesto aggiuntivo per tab
@@ -109,7 +116,9 @@ export async function POST(req: NextRequest) {
         .eq("restaurant_id", restaurant_id).gte("shift_date", start).lte("shift_date", end).order("shift_date");
       const { data: monthPurchases } = await supabase
         .from("purchases").select("supplier_name, amount, category, purchase_date")
-        .eq("restaurant_id", restaurant_id).gte("purchase_date", start).lte("purchase_date", end);
+        .eq("restaurant_id", restaurant_id)
+        .is("shift_id", null)
+        .gte("purchase_date", start).lte("purchase_date", end);
       const { data: fc } = await supabase
         .from("fixed_costs").select("category, label, amount, frequency").eq("restaurant_id", restaurant_id).eq("active", true);
       const { data: emp } = await supabase
@@ -120,7 +129,12 @@ export async function POST(req: NextRequest) {
       for (const p of (monthPurchases || [])) {
         cogsByCategory[p.category] = (cogsByCategory[p.category] || 0) + (p.amount || 0);
       }
-      extraContext = `\n\nTURNI MESE (${start}→${end}):\n${JSON.stringify(monthShifts || [], null, 2)}\n\nACQUISTI PER CATEGORIA:\n${JSON.stringify(cogsByCategory, null, 2)}\n\nCOSTI FISSI (normalizzati mensile):\n${JSON.stringify(fcMonthlized, null, 2)}\n\nPERSONALE:\n${JSON.stringify(emp || [], null, 2)}\n\nChiedi i dati strutturali mancanti (affitto, paghe). Confronta con il mese precedente se possibile.`;
+      const monthTotalRevenue = (monthShifts || []).reduce((s, sh) => s + ((sh.revenue as number) ?? 0), 0);
+      const cogsFromShifts = (monthShifts || []).reduce((s, sh) => s + ((sh.supplier_spend as number) ?? 0), 0);
+      const manualCogs = Object.values(cogsByCategory).reduce((s, v) => s + v, 0);
+      const totalCogs = cogsFromShifts + manualCogs;
+      const foodCostPct = monthTotalRevenue > 0 ? ((totalCogs / monthTotalRevenue) * 100).toFixed(1) : null;
+      extraContext = `\n\nTURNI MESE (${start}→${end}):\n${JSON.stringify(monthShifts || [], null, 2)}\n\nACQUISTI PER CATEGORIA:\n${JSON.stringify(cogsByCategory, null, 2)}\n\nCOSTI FISSI (normalizzati mensile):\n${JSON.stringify(fcMonthlized, null, 2)}\n\nPERSONALE:\n${JSON.stringify(emp || [], null, 2)}\n\nChiedi i dati strutturali mancanti (affitto, paghe). Confronta con il mese precedente se possibile.\n\nFATTURATO MESE: €${monthTotalRevenue.toFixed(2)}\nCOGS DA TURNI: €${cogsFromShifts.toFixed(2)}\nCOGS MANUALI: €${manualCogs.toFixed(2)}\nTOTALE COGS: €${totalCogs.toFixed(2)}${foodCostPct ? `\nFOOD COST %: ${foodCostPct}% (benchmark sano: 28–35%, FIPE 2025)` : ""}`;
     }
 
     if (tab === "year") {
@@ -165,7 +179,7 @@ export async function POST(req: NextRequest) {
 
     // 4. Sistema prompt
     const isLearn = tab === "learn";
-    let systemPrompt = isLearn ? buildLearnSystemPrompt(locale) : buildSystemPrompt(restaurantData || {}, locale);
+    let systemPrompt = isLearn ? buildLearnSystemPrompt(locale) : buildSystemPrompt(restaurantData || {}, locale, aiMemory);
     if (extraContext) systemPrompt += extraContext;
 
     // 5. Chiama Claude
