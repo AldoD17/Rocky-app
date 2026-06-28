@@ -54,7 +54,6 @@ export function AppShell({ onSettings }: { onSettings: () => void }) {
     { label: `⏱️ ${t("qbServiceHours")}`,    prefix: `⏱️ ${t("qbServiceHours")}: `    },
     { label: `👥 ${t("qbEmployees")}`,        prefix: `👥 ${t("qbEmployees")}: `,       onClick: () => setShowEmployeePanel(true) },
     { label: `🕐 ${t("qbShiftHours")}`,      prefix: `🕐 ${t("qbShiftHours")}: `      },
-    { label: `📦 ${t("qbPurchases")}`,        prefix: `📦 ${t("qbPurchases")}: `        },
   ];
 
   const getInitialMessages = useCallback((tId: TabId): Message[] => {

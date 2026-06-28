@@ -134,11 +134,16 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ status: "error", message: "Forbidden" }, { status: 403 });
 
     // 1. Estrai dati strutturati
+    const now = new Date();
+    const serverHour = now.getHours();
+    const defaultService = serverHour >= 5 && serverHour < 16 ? "pranzo" : "cena";
+    const timeContext = `Oggi è ${today}. Ora del server: ${serverHour}:${String(now.getMinutes()).padStart(2, "0")}. Se il servizio non è specificato, usa "${defaultService}" come default.`;
+
     const extractionRes = await anthropic.messages.create({
       model: "claude-sonnet-4-6",
       max_tokens: 768,
       system: TURNO_EXTRACTION_PROMPT,
-      messages: [{ role: "user", content: `Oggi è ${today}.\n\nMessaggio del ristoratore:\n"${user_message.trim()}"` }],
+      messages: [{ role: "user", content: `${timeContext}\n\nMessaggio del ristoratore:\n"${user_message.trim()}"` }],
     });
 
     const rawText = extractionRes.content
